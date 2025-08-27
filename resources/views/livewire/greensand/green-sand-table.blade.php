@@ -27,11 +27,28 @@
                 <span class="ml-2">entries</span>
             </div>
 
-            <div class="d-flex align-items-center">
-                <span class="mr-2">Search</span>
-                <input type="text" class="form-control form-control-sm" style="width:220px" placeholder="Mix / Type"
-                    wire:model.debounce.400ms="search">
+            {{-- SEARCH PILL --}}
+            <div class="position-relative" style="width:260px">
+                <input type="text" class="form-control form-control-sm pr-5 rounded-pill" placeholder="Mix / Type"
+                    wire:model.defer="searchText" wire:keydown.enter="applySearch">
+
+                {{-- Tombol kaca pembesar di dalam input (kanan) --}}
+                <button type="button" class="btn btn-sm position-absolute"
+                    style="right:34px; top:50%; transform:translateY(-50%); border:none; background:transparent"
+                    title="Apply search" wire:click="applySearch">
+                    <i class="ri-search-line"></i>
+                </button>
+
+                {{-- Tombol clear (X) muncul kalau ada teks atau filter aktif --}}
+                @if(($searchText ?? '') !== '' || ($search ?? '') !== '')
+                    <button type="button" class="btn btn-sm position-absolute"
+                        style="right:6px; top:50%; transform:translateY(-50%); border:none; background:transparent"
+                        title="Clear" wire:click="clearSearch">
+                        <i class="ri-close-line"></i>
+                    </button>
+                @endif
             </div>
+
         </div>
 
         <div class="table-responsive">

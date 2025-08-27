@@ -23,13 +23,36 @@ class Greensand extends Component
     // Tabel controls
     public string $search = '';
     public int $perPage = 10;
+    public string $searchText = '';
+
+    public function applySearch(): void
+{
+    $this->search = trim($this->searchText);
+    $this->resetPage('page_mm1');
+    $this->resetPage('page_mm2');
+}
+
+public function clearSearch(): void
+{
+    $this->searchText = '';
+    $this->search = '';
+    $this->resetPage('page_mm1');
+    $this->resetPage('page_mm2');
+}
+
+    // Tambahan: bind query string agar state konsisten
+    protected array $queryString = [
+        'activeTab' => ['except' => 'mm1'],
+        'search'    => ['except' => ''],
+        'perPage'   => ['except' => 10],
+    ];
 
     // ===== Form State =====
     public array $form = [
         // Header
         'process_date' => null,
         'shift' => '',
-        'plant' => 0, // bool?
+        'plant' => 0,
         'mm_no' => 1,
         'mix_no' => null,
         'mix_start_t' => null,
@@ -82,7 +105,7 @@ class Greensand extends Component
             // Header
             'form.process_date' => ['required', 'date'],
             'form.shift' => ['required', Rule::in(['Day', 'Night'])],
-            'form.plant' => ['required', 'integer', 'in:0,1'], // bool?
+            'form.plant' => ['required', 'integer', 'in:0,1'],
             'form.mm_no' => ['required', 'integer', 'in:1,2'],
             'form.mix_no' => ['required', 'integer', 'min:1'],
             'form.mix_start_t' => ['nullable', 'date_format:H:i'],
@@ -132,12 +155,12 @@ class Greensand extends Component
     // ===== Table Data Providers (dua paginator, satu tabel) =====
     public function getRowsMm1Property()
     {
-        return $this->queryRows(1); // DRY
+        return $this->queryRows(1);
     }
 
     public function getRowsMm2Property()
     {
-        return $this->queryRows(2); // DRY
+        return $this->queryRows(2);
     }
 
     public function getCurrentRowsProperty()
@@ -149,6 +172,12 @@ class Greensand extends Component
     public function setActiveTab(string $tab): void
     {
         $this->activeTab = in_array($tab, ['mm1', 'mm2']) ? $tab : 'mm1';
+        // penting: reset paginator sesuai tab agar hasil sinkron
+        if ($this->activeTab === 'mm1') {
+            $this->resetPage('page_mm1');
+        } else {
+            $this->resetPage('page_mm2');
+        }
     }
 
     public function setMm(int $mm): void
@@ -158,7 +187,7 @@ class Greensand extends Component
 
     public function setModalTab(string $tab): void
     {
-        $this->modalTab = $tab; // simple
+        $this->modalTab = $tab;
     }
 
     public function create(): void
@@ -235,11 +264,10 @@ class Greensand extends Component
     {
         $this->validate();
 
-        $mixStart = $this->combineDateTime($this->form['process_date'], $this->form['mix_start_t']);
+        $mixStart  = $this->combineDateTime($this->form['process_date'], $this->form['mix_start_t']);
         $mixFinish = $this->combineDateTime($this->form['process_date'], $this->form['mix_finish_t']);
-        $returnAt = $this->combineDateTime($this->form['process_date'], $this->form['return_time_t']);
+        $returnAt  = $this->combineDateTime($this->form['process_date'], $this->form['return_time_t']);
 
-        // Cek unik gabungan (sesuai unique index db)
         $exists = Process::query()
             ->when($this->formMode === 'edit', fn($q) => $q->where('id', '!=', $this->editingId))
             ->where('process_date', $this->form['process_date'])
@@ -326,7 +354,7 @@ class Greensand extends Component
                 $s = '%' . $this->search . '%';
                 $q->where(function ($qq) use ($s) {
                     $qq->where('mix_no', 'like', $s)
-                        ->orWhere('model_type', 'like', $s);
+                       ->orWhere('model_type', 'like', $s);
                 });
             })
             ->orderByDesc('process_date')
@@ -336,8 +364,7 @@ class Greensand extends Component
 
     private function combineDateTime(?string $date, ?string $time): ?string
     {
-        if (!$date || !$time)
-            return null;
+        if (!$date || !$time) return null;
         return "$date $time:00";
     }
 
@@ -393,6 +420,7 @@ class Greensand extends Component
     // Reaktif: reset halaman saat state kontrol berubah
     public function updatedSearch()
     {
+        $this->search = trim($this->search);
         $this->resetPage('page_mm1');
         $this->resetPage('page_mm2');
     }
