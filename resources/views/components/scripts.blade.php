@@ -29,5 +29,8 @@
 <!-- <script src={{ asset('assets/js/pages/datatables.init.js') }}></script> -->
 
 <script src={{ asset('assets/libs/toastr/build/toastr.min.js') }}></script>
-
+<script src={{ asset('assets/libs/select2/js/select2.min.js') }}></script>
 <script src={{ asset('assets/js/app.js') }}></script>
+@vite([
+  'resources/js/app.js',
+])
