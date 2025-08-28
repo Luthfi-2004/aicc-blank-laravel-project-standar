@@ -18,8 +18,6 @@
             </div>
         </div>
         <!-- end page title -->
-
-
         <div class="row">
             <div class="col-xl-8">
                 <div class="row">

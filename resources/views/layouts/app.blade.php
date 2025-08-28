@@ -4,7 +4,7 @@
 <head>
     <title>{{ $title ?? 'SandLab' }}</title>
     @include('components.head')
-
+    
 </head>
 
 <body data-sidebar="dark">
