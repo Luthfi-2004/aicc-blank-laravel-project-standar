@@ -34,3 +34,66 @@
 @vite([
   'resources/js/app.js',
 ])
+<script src="{{ asset('assets/js/greensand-filter.js') }}"></script>
+<script>
+  window.addEventListener('gs:export', (e) => {
+    // Livewire v3: detail bisa berupa object atau array args
+    const d = e.detail;
+    const url = (d && (d.url || (Array.isArray(d) && d[0]?.url))) || null;
+    if (url) window.location.href = url;
+  });
+</script>
+
+<script>
+(function () {
+  const sync = () => {
+    const s = document.getElementById('startDate');
+    const e = document.getElementById('endDate');
+    if (!s || !e) return;
+
+    // set batas minimum
+    e.min = s.value || '';
+
+    if (!s.value) {
+      // kalau start kosong, end biarkan (atau kosongkan – sesuai selera)
+      return;
+    }
+
+    // AUTO-FILL: end = start bila end kosong atau < start
+    if (!e.value || e.value < s.value) {
+      e.value = s.value;
+      e.dispatchEvent(new Event('input',  { bubbles: true }));
+      e.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const s = document.getElementById('startDate');
+    const e = document.getElementById('endDate');
+    s?.addEventListener('input',  sync);
+    s?.addEventListener('change', sync);
+    e?.addEventListener('change', () => {
+      // kalau user set end < start, luruskan
+      if (s?.value && e.value < s.value) {
+        e.value = s.value;
+        e.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
+    sync();
+  });
+
+  document.addEventListener('livewire:init', () => {
+    document.addEventListener('livewire:navigated', sync);
+  });
+})();
+</script>
+
+<script>
+  (function () {
+    const MODAL_ID = '#confirmDeleteModal';
+
+    window.addEventListener('gs:confirm-open',  () => { $(MODAL_ID).modal('show'); });
+    window.addEventListener('gs:confirm-close', () => { $(MODAL_ID).modal('hide'); });
+  })();
+</script>
+

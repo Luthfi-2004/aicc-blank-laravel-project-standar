@@ -1,75 +1,77 @@
-{{-- resources/views/livewire/greensand/green-sand.blade.php --}}
 <div class="page-content">
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-
-                {{-- Page Title --}}
                 <div class="page-title-box d-flex align-items-center justify-content-between">
                     <h4 class="mb-0">Green Sand Check</h4>
                     <small class="text-muted">quality-control ></small>
                 </div>
+{{-- FILTER --}}
+<div class="card mb-3">
+  <div class="card-header bg-light d-flex justify-content-between align-items-center cursor-pointer"
+       data-toggle="collapse" data-target="#filterCollapse"
+       aria-expanded="false" aria-controls="filterCollapse" id="filterHeader">
+    <h5 class="font-size-14 mb-0">
+      <i class="ri-filter-2-line align-middle mr-1"></i> Filter Data
+    </h5>
+    <i class="ri-add-line" id="filterIcon"></i>
+  </div>
 
-                {{-- =================== FILTER =================== --}}
-                <div class="card mb-3">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center cursor-pointer"
-                        data-toggle="collapse" data-target="#filterCollapse" aria-expanded="false"
-                        aria-controls="filterCollapse" id="filterHeader">
-                        <h5 class="font-size-14 mb-0">
-                            <i class="ri-filter-2-line align-middle mr-1"></i> Filter Data
-                        </h5>
-                        <i class="ri-add-line" id="filterIcon"></i>
-                    </div>
+  {{-- wire:ignore supaya Livewire tidak ganggu collapse --}}
+  <div id="filterCollapse" class="collapse" aria-labelledby="filterHeader" wire:ignore>
+    <div class="card-body">
+      <div class="row align-items-end">
+        <div class="col-xl-3 col-lg-3 mb-2">
+          <label class="form-label mb-1">Start Date</label>
+          <input id="startDate" type="date" class="form-control" wire:model.live="start_date">
+        </div>
 
-                    <div id="filterCollapse" class="collapse" aria-labelledby="filterHeader">
-                        <div class="card-body">
-                            <div class="row align-items-end">
-                                <div class="col-xl-3 col-lg-3">
-                                    <label class="form-label mb-1">Start Date</label>
-                                    <input type="date" class="form-control">
-                                </div>
+        <div class="col-xl-3 col-lg-3 mb-2">
+          <label class="form-label mb-1">End Date</label>
+          <input id="endDate"   type="date" class="form-control" wire:model.live="end_date">
+        </div>
 
-                                <div class="col-xl-3 col-lg-3">
-                                    <label class="form-label mb-1">End Date</label>
-                                    <input type="date" class="form-control">
-                                </div>
+        <div class="col-xl-3 col-lg-3 mb-2">
+          <label class="form-label mb-1">Shift</label>
+          <select class="form-control" wire:model.defer="filter_shift">
+            <option value="" {{ empty($filter_shift) ? 'selected' : '' }}>-- Select Shift --</option>
+            <option value="Day">Day</option>
+            <option value="Night">Night</option>
+          </select>
+        </div>
 
-                                <div class="col-xl-3 col-lg-3">
-                                    <label class="form-label mb-1">Model</label>
-                                    <select class="form-control">
-                                        <option value="">-- Select Model --</option>
-                                    </select>
-                                </div>
+        <div class="col-xl-3 col-lg-3 mb-2">
+          <label class="form-label mb-1">Search (mix/model)</label>
+          <div class="input-group">
+            <input type="text" class="form-control" wire:model.defer="searchText" placeholder="keyword...">
+            <div class="input-group-append">
+              <button type="button" class="btn btn-primary" wire:click="applySearch">
+                <i class="ri-search-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
 
-                                <div class="col-xl-3 col-lg-3">
-                                    <label class="form-label mb-1">Shift</label>
-                                    <select class="form-control">
-                                        <option value="">-- Select Shift --</option>
-                                        <option value="1">Shift 1</option>
-                                        <option value="2">Shift 2</option>
-                                        <option value="3">Shift 3</option>
-                                    </select>
-                                </div>
+        <div class="col-xl-6 col-lg-12 mt-2">
+          <div class="d-flex flex-wrap">
+            <button type="button" class="btn btn-primary btn-sm mr-2 mb-2" wire:click="applySearch">
+              <i class="ri-search-line mr-1"></i> Search
+            </button>
+            <button type="button" class="btn btn-outline-primary btn-sm mr-2 mb-2" wire:click="clearFilters">
+              <i class="ri-refresh-line mr-1"></i> Refresh Filter
+            </button>
+            <button type="button" class="btn btn-outline-success btn-sm mb-2" wire:click="export">
+              <i class="ri-file-excel-2-line mr-1"></i> Export Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{-- /FILTER --}}
 
-                                <div class="col-xl-4 col-lg-12 mt-3">
-                                    <div class="d-flex flex-wrap">
-                                        <button type="button" class="btn btn-primary btn-sm mr-2 mb-2">
-                                            <i class="ri-search-line mr-1"></i> Search
-                                        </button>
-                                        <button type="button" class="btn btn-outline-primary btn-sm mr-2 mb-2">
-                                            <i class="ri-refresh-line mr-1"></i> Refresh
-                                        </button>
-                                        <button type="button" class="btn btn-outline-success btn-sm mb-2">
-                                            <i class="ri-file-excel-2-line mr-1"></i> Export Excel
-                                        </button>
-                                    </div>
-                                </div>
 
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {{-- ================ /FILTER ================== --}}
 
                 {{-- =================== ACTIONS + TABLE =================== --}}
                 <div class="card mb-4">

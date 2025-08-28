@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Process extends Model
 {
     protected $table = 'tb_process';
+    protected $guarded = [];
 
     protected $fillable = [
         'process_date','shift','plant','mm_no','mix_no','mix_start','mix_finish',
@@ -19,6 +20,7 @@ class Process extends Model
     ];
 
     protected $casts = [
+        'check_date'   => 'date:Y-m-d',
         'process_date' => 'date',
         'mix_start'    => 'datetime',
         'mix_finish'   => 'datetime',
