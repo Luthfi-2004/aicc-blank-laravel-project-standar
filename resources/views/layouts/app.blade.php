@@ -42,26 +42,6 @@
     <div class="rightbar-overlay"></div>
 
     @include('components.scripts')
-
-    <script>
-        // Custom scripts can be added here
-        document.addEventListener("DOMContentLoaded", function() {
-            toastr.options = {
-                closeButton: true,
-                progressBar: true,
-                timeOut: 5000, // 5000 ms = 5 detik
-                extendedTimeOut: 1000 // tambahan jika hover
-            };
-            // Your custom JavaScript code here
-            @if (session()->has('message'))
-                toastr.success("{{ session('message') }}");
-            @endif
-
-            @if (session()->has('error'))
-                toastr.error("{{ session('error') }}");
-            @endif
-        });
-    </script>
     @stack('scripts')
 </body>
 

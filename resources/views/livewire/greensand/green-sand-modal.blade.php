@@ -310,8 +310,4 @@
   </div>
 </div>
 
-<script>
-  // Event helper untuk buka/tutup via Livewire
-  window.addEventListener('gs:open', () => { $('#modal-greensand').modal('show'); });
-  window.addEventListener('gs:close', () => { $('#modal-greensand').modal('hide'); });
-</script>
+
