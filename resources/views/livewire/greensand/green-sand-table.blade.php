@@ -67,10 +67,10 @@
                     <tr wire:key="row-{{ $row->id }}">
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
-                                <button class="btn btn-warning btn-sm mr-2" wire:click="edit({{ $row->id }})">
+                                <button class="btn btn-outline-warning btn-sm mr-2" wire:click="edit({{ $row->id }})">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-danger btn-sm" wire:click="confirmDelete({{ $row->id }})">
+                                <button class="btn btn-outline-danger btn-sm" wire:click="confirmDelete({{ $row->id }})">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
