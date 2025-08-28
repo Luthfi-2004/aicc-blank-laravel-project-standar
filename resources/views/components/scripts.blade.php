@@ -34,7 +34,6 @@
 @vite([
   'resources/js/app.js',
 ])
-<script src="{{ asset('assets/js/greensand-filter.js') }}"></script>
 <script>
   window.addEventListener('gs:export', (e) => {
     // Livewire v3: detail bisa berupa object atau array args
@@ -97,3 +96,8 @@
   })();
 </script>
 
+<script>
+  // Event helper untuk buka/tutup via Livewire
+  window.addEventListener('gs:open', () => { $('#modal-greensand').modal('show'); });
+  window.addEventListener('gs:close', () => { $('#modal-greensand').modal('hide'); });
+</script>
