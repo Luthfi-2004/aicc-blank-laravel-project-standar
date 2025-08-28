@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>{{ $title ?? 'Packing Palet' }}</title>
+    <title>{{ $title ?? 'SandLab' }}</title>
     @include('components.head')
 
 </head>
