@@ -2,46 +2,45 @@
 <html lang="en">
 
 <head>
+    <meta charset="utf-8">
     <title>{{ $title ?? 'SandLab' }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {{-- Head partial (CSS tema, icons, dll.) --}}
     @include('components.head')
-    
+
+    {{-- Vite CSS (jika ada resources/css/app.css) --}}
+    <!-- @vite(['resources/css/app.css']) -->
 </head>
 
 <body data-sidebar="dark">
-
-    <!-- Begin page -->
     <div id="layout-wrapper">
-
+        {{-- Topbar --}}
         @livewire('components.topbar')
 
-        <!-- ========== Left Sidebar Start ========== -->
+        {{-- Sidebar --}}
         @livewire('components.sidebar')
-        <!-- Left Sidebar End -->
-            
-        <!-- ============================================================== -->
-        <!-- Start right Content here -->
-        <!-- ============================================================== -->
 
-        <!-- main content -->
+        {{-- Content --}}
         <div class="main-content">
-
             {{ $slot }}
-
             @include('components.footer')
         </div>
-        <!-- end main content-->
-
     </div>
-    <!-- END layout-wrapper -->
 
-    <!-- Right Sidebar -->
+    {{-- Rightbar --}}
     @include('components.rightbar')
-    <!-- /Right-bar -->
 
-    <!-- Right bar overlay-->
+    {{-- Overlay --}}
     <div class="rightbar-overlay"></div>
 
+    {{-- Vendor scripts + Livewire scripts (sesuai file kamu) --}}
     @include('components.scripts')
+
+    {{-- Vite JS entry: pastikan app.js meng-import ./greensand --}}
+    @vite(['resources/js/app.js'])
+
+    {{-- Stack untuk script halaman spesifik --}}
     @stack('scripts')
 </body>
 

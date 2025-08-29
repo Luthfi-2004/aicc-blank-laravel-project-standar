@@ -1,7 +1,8 @@
+<!-- resources/views/livewire/greensand/green-sand-table.blade.php -->
 <div class="card">
     <div class="card-body">
 
-        {{-- ====== TAB NAVIGATION ====== --}}
+        {{-- TAB NAVIGATION --}}
         <ul class="nav nav-tabs mb-3">
             <li class="nav-item">
                 <a href="#" class="nav-link {{ $activeTab === 'mm1' ? 'active' : '' }}"
@@ -23,7 +24,7 @@
             </li>
         </ul>
 
-        {{-- ====== PERPAGE & SEARCH ====== --}}
+        {{-- PERPAGE & SEARCH --}}
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center">
                 <span class="mr-2">Show</span>
@@ -36,29 +37,37 @@
             </div>
 
             <div class="position-relative" style="width:260px">
-                <input type="text"
-                       class="form-control form-control-sm pr-5 rounded-pill"
-                       placeholder="Mix / Type"
-                       wire:model.defer="searchText"
-                       wire:keydown.enter="applySearch">
+                <input
+                    type="text"
+                    class="form-control form-control-sm pr-5 rounded-pill"
+                    placeholder="Mix / Type"
+                    wire:model.defer="searchText"
+                    wire:keydown.enter="applySearch"
+                    autocomplete="off">
 
-                <button type="button" class="btn btn-sm position-absolute"
-                        style="right:34px; top:50%; transform:translateY(-50%); border:none; background:transparent"
-                        title="Apply search" wire:click="applySearch">
+                <button
+                    type="button"
+                    class="btn btn-sm position-absolute"
+                    style="right:34px; top:50%; transform:translateY(-50%); border:none; background:transparent"
+                    title="Apply search"
+                    wire:click="applySearch">
                     <i class="ri-search-line"></i>
                 </button>
 
                 @if(($searchText ?? '') !== '' || ($search ?? '') !== '')
-                    <button type="button" class="btn btn-sm position-absolute"
-                            style="right:6px; top:50%; transform:translateY(-50%); border:none; background:transparent"
-                            title="Clear" wire:click="clearSearch">
+                    <button
+                        type="button"
+                        class="btn btn-sm position-absolute"
+                        style="right:6px; top:50%; transform:translateY(-50%); border:none; background:transparent"
+                        title="Clear"
+                        wire:click="clearSearch">
                         <i class="ri-close-line"></i>
                     </button>
                 @endif
             </div>
         </div>
 
-        {{-- ====== DATA TABLE ====== --}}
+        {{-- DATA TABLE --}}
         <div class="table-responsive">
             <table class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; width:100%;">
                 @includeIf('livewire.greensand._thead')
@@ -76,7 +85,7 @@
                             </div>
                         </td>
 
-                        {{-- ====== KOLOM DATA ====== --}}
+                        {{-- KOLOM DATA (biarkan sesuai field kamu) --}}
                         <td class="text-center">{{ optional($row->process_date)->format('Y-m-d') }}</td>
                         <td class="text-center">{{ $row->shift }}</td>
                         <td class="text-center">{{ $row->mm_no }}</td>
@@ -123,37 +132,38 @@
                 </tbody>
             </table>
         </div>
-{{-- ==== Modal Konfirmasi Hapus (GLOBAL, cuma satu) ==== --}}
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteLabel" aria-hidden="true" wire:ignore>
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-warning text-dark">
-        <h5 class="modal-title" id="confirmDeleteLabel">
-          <i class="ri-error-warning-line mr-1"></i> Konfirmasi Hapus
-        </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close" wire:click="cancelDelete">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
 
-      <div class="modal-body">
-        Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.
-      </div>
+        {{-- Modal Konfirmasi Hapus (global) --}}
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteLabel" aria-hidden="true" wire:ignore.self>
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="confirmDeleteLabel">
+                  <i class="ri-error-warning-line mr-1"></i> Konfirmasi Hapus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" wire:click="cancelDelete">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" wire:click="cancelDelete">
-          Batal
-        </button>
-        <button type="button" class="btn btn-danger" wire:click="deleteConfirmed" wire:loading.attr="disabled">
-          <span wire:loading.remove>Ya, Hapus</span>
-          <span wire:loading>Memproses...</span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+              <div class="modal-body">
+                Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.
+              </div>
 
-        {{-- ====== PAGINATION ====== --}}
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" wire:click="cancelDelete">
+                  Batal
+                </button>
+                <button type="button" class="btn btn-danger" wire:click="deleteConfirmed" wire:loading.attr="disabled">
+                  <span wire:loading.remove>Ya, Hapus</span>
+                  <span wire:loading>Memproses...</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {{-- PAGINATION (tetap sesuai tab aktif) --}}
         <div class="d-flex justify-content-between align-items-center">
             @if ($activeTab === 'mm1')
                 <small class="text-muted">
