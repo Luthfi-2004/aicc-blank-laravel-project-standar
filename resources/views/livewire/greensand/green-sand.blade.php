@@ -96,9 +96,6 @@
             </div>
           </div>
         </div>
-        {{-- ============================== /FILTER ============================== --}}
-
-
                 {{-- ACTIONS + TABLE --}}
                 <div class="card mb-4">
                     <div class="card-body p-3 p-md-4 bg-light rounded">
