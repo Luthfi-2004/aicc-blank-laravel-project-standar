@@ -5,11 +5,9 @@
     <title>{{ $title ?? 'SandLab' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {{-- Head partial (CSS tema, icons, dll.) --}}
+    {{-- Head partial: CSS tema, icons, dll. --}}
     @include('components.head')
 
-
-    {{-- @vite(['resources/css/app.css']) --}}
 </head>
 
 <body data-sidebar="dark">
@@ -36,8 +34,11 @@
     {{-- Vendor scripts + Livewire scripts (pipeline statis) --}}
     @include('components.scripts')
 
-    {{-- (Nonaktifkan Vite JS entry jika pakai pipeline statis) --}}
-    {{-- @vite(['resources/js/app.js']) --}}
+    {{-- ============================================
+         Vite entry untuk resources/js/greensand.js
+         (biarkan vendor pipeline statis tetap jalan)
+       ============================================ --}}
+    @vite(['resources/js/greensand.js'])
 
     {{-- Stack untuk script halaman spesifik --}}
     @stack('scripts')
