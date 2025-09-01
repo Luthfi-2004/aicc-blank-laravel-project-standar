@@ -1,4 +1,3 @@
-<!-- resources/views/livewire/greensand/green-sand.blade.php -->
 <div class="page-content">
     <div class="container-fluid">
         <div class="row">

@@ -1,4 +1,3 @@
-<!-- resources/views/livewire/greensand/green-sand-modal.blade.php -->
 <div class="modal fade" id="modal-greensand" tabindex="-1" role="dialog" aria-labelledby="gsModalLabel"
      aria-hidden="true" wire:ignore.self>
   <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">

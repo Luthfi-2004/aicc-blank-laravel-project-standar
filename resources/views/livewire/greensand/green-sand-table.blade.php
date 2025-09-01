@@ -1,4 +1,3 @@
-<!-- resources/views/livewire/greensand/green-sand-table.blade.php -->
 <div class="card">
   <div class="card-body">
 
