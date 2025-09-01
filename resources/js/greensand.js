@@ -57,18 +57,17 @@ document.addEventListener('livewire:init', () => {
 
   function lock(on) {
     $col.attr('data-lock', on ? '1' : '0');
-    $header.toggleClass('locked', !!on); // opsional: bisa diberi style pointer-events:none
+    $header.toggleClass('locked', !!on); 
   }
 
   function reconcileCollapse() {
     // Jangan ganggu saat animasi
     if ($col.attr('data-lock') === '1') return;
 
-    const shouldOpen = $col.attr('data-open') === '1';     // niat dari Livewire
-    const lastState  = $col.attr('data-gs-state') === '1'; // state riil terakhir yang diterapkan
-    const isShown    = $col.hasClass('show');              // DOM sekarang
+    const shouldOpen = $col.attr('data-open') === '1';     
+    const lastState  = $col.attr('data-gs-state') === '1'; 
+    const isShown    = $col.hasClass('show');              // DOM
 
-    // Render pertama: set ikon & cache sesuai DOM, selesai
     if (!$col.data('gs-boot')) {
       setIcon(isShown);
       $col.attr('data-gs-state', isShown ? '1' : '0');

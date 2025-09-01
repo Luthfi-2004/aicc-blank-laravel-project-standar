@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <title>{{ $title ?? 'SandLab' }}</title>
@@ -9,8 +8,8 @@
     {{-- Head partial (CSS tema, icons, dll.) --}}
     @include('components.head')
 
-    {{-- Vite CSS (jika ada resources/css/app.css) --}}
-    <!-- @vite(['resources/css/app.css']) -->
+
+    {{-- @vite(['resources/css/app.css']) --}}
 </head>
 
 <body data-sidebar="dark">
@@ -34,14 +33,13 @@
     {{-- Overlay --}}
     <div class="rightbar-overlay"></div>
 
-    {{-- Vendor scripts + Livewire scripts (sesuai file kamu) --}}
+    {{-- Vendor scripts + Livewire scripts (pipeline statis) --}}
     @include('components.scripts')
 
-    {{-- Vite JS entry: pastikan app.js meng-import ./greensand --}}
-    @vite(['resources/js/app.js'])
+    {{-- (Nonaktifkan Vite JS entry jika pakai pipeline statis) --}}
+    {{-- @vite(['resources/js/app.js']) --}}
 
     {{-- Stack untuk script halaman spesifik --}}
     @stack('scripts')
 </body>
-
 </html>
