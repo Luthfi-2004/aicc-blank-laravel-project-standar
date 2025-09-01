@@ -176,8 +176,6 @@ class GreensandExportFull implements FromQuery, WithHeadings, WithMapping, WithS
             ],
         ]);
 
-        $sheet->freezePane('A3');
-
         return [];
     }
 

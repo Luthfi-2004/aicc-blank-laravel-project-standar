@@ -97,10 +97,8 @@
           </div>
         </div>
                 {{-- ACTIONS + TABLE --}}
-                <div class="card mb-4">
-                    <div class="card-body p-3 p-md-4 bg-light rounded">
-
-                        {{-- Add Data: tetap pakai data-toggle agar tidak perlu JS tambahan --}}
+                <div class="card mb-4 ">
+                    <div class="card-body shadow-lg">
                         <div class="mb-3">
                             <button
                                 type="button"
