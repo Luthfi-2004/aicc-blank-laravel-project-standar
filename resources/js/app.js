@@ -1,2 +1,2 @@
 import './bootstrap';
-import './greensand';
+import '../../public/assets/js/greensand';

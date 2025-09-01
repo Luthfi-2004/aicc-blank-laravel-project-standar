@@ -13,9 +13,15 @@
 <script src="{{ asset('assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
 <script src="{{ asset('assets/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js') }}"></script>
 
-{{-- Plugins --}}
+{{-- Plugins lain (pakai kalau perlu) --}}
 <script src="{{ asset('assets/libs/select2/js/select2.min.js') }}"></script>
-<script src="{{ asset('assets/libs/toastr/build/toastr.min.js') }}"></script>
+{{-- <script src="{{ asset('assets/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script> --}}
+{{-- <script src="{{ asset('assets/libs/sweetalert2/sweetalert2.min.js') }}"></script> --}}
+{{-- <script src="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.min.js') }}"></script> --}}
+{{-- <script src="{{ asset('assets/libs/admin-resources/jquery.vectormap/maps/jquery-jvectormap-world-mill-en.js') }}"></script> --}}
 
-{{-- WAJIB: Theme init (harus paling akhir) --}}
+{{-- Theme init (Nazox/tema) --}}
 <script src="{{ asset('assets/js/app.js') }}"></script>
+
+{{-- Custom (WAJIB kalau kamu punya logic: modal Livewire, re-init select2, dll.) --}}
+<script src="{{ asset('assets/js/greensand.js') }}"></script>

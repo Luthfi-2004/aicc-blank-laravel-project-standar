@@ -38,7 +38,7 @@
          Vite entry untuk resources/js/greensand.js
          (biarkan vendor pipeline statis tetap jalan)
        ============================================ --}}
-    @vite(['resources/js/greensand.js'])
+
 
     {{-- Stack untuk script halaman spesifik --}}
     @stack('scripts')
