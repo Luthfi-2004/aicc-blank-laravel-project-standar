@@ -3,22 +3,24 @@
   <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
     <div class="modal-content">
 
+      {{-- Header --}}
       <div class="modal-header">
         <h5 class="modal-title" id="gsModalLabel">{{ $formMode === 'edit' ? 'Edit' : 'Add' }} Green Sand</h5>
-        {{-- BS4 close button --}}
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                 @if (isset($forceBs5) && $forceBs5) data-bs-dismiss="modal" @endif>
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
 
+      {{-- Body --}}
       <div class="modal-body">
-        {{-- HEADER ringkas --}}
+
+        {{-- Header --}}
         <div class="card mb-3">
           <div class="card-body">
             <div class="row">
 
-              {{-- 1) M (MM1/MM2) --}}
+              {{-- MM --}}
               <div class="col-md-2 mb-2">
                 <label class="form-label mb-1">M</label>
                 <div class="btn-group btn-group-sm d-flex">
@@ -31,7 +33,7 @@
                 </div>
               </div>
 
-              {{-- 2) Shift --}}
+              {{-- Shift --}}
               <div class="col-md-2 mb-2">
                 <label class="form-label mb-1">Shift</label>
                 <select class="form-control @error('form.shift') is-invalid @enderror"
@@ -43,7 +45,7 @@
                 @error('form.shift') <div class="invalid-feedback">{{ $message }}</div> @enderror
               </div>
 
-              {{-- 3) Process Date --}}
+              {{-- Tanggal --}}
               <div class="col-md-3 mb-2">
                 <label class="form-label mb-1">Process Date</label>
                 <input type="date"
@@ -52,16 +54,17 @@
                 @error('form.process_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
               </div>
 
-              {{-- 4) Mix Ke --}}
+              {{-- Mix --}}
               <div class="col-md-2 mb-2">
                 <label class="form-label mb-1">Mix Ke</label>
                 <input type="number" min="1"
                        class="form-control @error('form.mix_no') is-invalid @enderror"
-                       wire:model.defer="form.mix_no" placeholder="Enter Sample Mix Ke" inputmode="numeric" autocomplete="off">
+                       wire:model.defer="form.mix_no" placeholder="Enter Sample Mix Ke"
+                       inputmode="numeric" autocomplete="off">
                 @error('form.mix_no') <div class="invalid-feedback">{{ $message }}</div> @enderror
               </div>
 
-              {{-- 5) Mix Start --}}
+              {{-- Start --}}
               <div class="col-md-3 mb-2">
                 <label class="form-label mb-1">Mix Start</label>
                 <input type="time" class="form-control @error('form.mix_start_t') is-invalid @enderror"
@@ -69,7 +72,7 @@
                 @error('form.mix_start_t') <div class="invalid-feedback">{{ $message }}</div> @enderror
               </div>
 
-              {{-- 6) Mix Finish --}}
+              {{-- Finish --}}
               <div class="col-md-3 mb-2">
                 <label class="form-label mb-1">Mix Finish</label>
                 <input type="time" class="form-control @error('form.mix_finish_t') is-invalid @enderror"
@@ -81,7 +84,7 @@
           </div>
         </div>
 
-        {{-- TABS (MM / Additive / BC / Return) --}}
+        {{-- Tabs --}}
         <ul class="nav nav-tabs mb-3" role="tablist">
           <li class="nav-item">
             <a class="nav-link {{ $modalTab==='mm'?'active':'' }}" data-toggle="tab" href="#tab-mm" role="tab"
@@ -109,7 +112,9 @@
           </li>
         </ul>
 
+        {{-- Konten --}}
         <div class="tab-content">
+
           {{-- MM --}}
           <div class="tab-pane fade {{ $modalTab==='mm'?'show active':'' }}" id="tab-mm" role="tabpanel">
             <div class="card">
@@ -230,7 +235,7 @@
             </div>
           </div>
 
-          {{-- Return Sand --}}
+          {{-- Return --}}
           <div class="tab-pane fade {{ $modalTab==='return'?'show active':'' }}" id="tab-return" role="tabpanel">
             <div class="card">
               <div class="card-body">
@@ -290,18 +295,20 @@
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
           </div>
+
         </div>
       </div>
 
+      {{-- Footer --}}
       <div class="modal-footer d-flex justify-content-end">
-        <button
-          type="button"
-          class="btn btn-outline-secondary btn-cancel-row mr-2"
-          data-dismiss="modal"
-          @if (isset($forceBs5) && $forceBs5) data-bs-dismiss="modal" @endif>
+        <button type="button"
+                class="btn btn-outline-secondary btn-cancel-row mr-2"
+                data-dismiss="modal"
+                @if (isset($forceBs5) && $forceBs5) data-bs-dismiss="modal" @endif>
           <i class="ri-close-line"></i> Cancel
         </button>
 

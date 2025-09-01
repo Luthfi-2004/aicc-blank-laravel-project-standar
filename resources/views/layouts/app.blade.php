@@ -5,9 +5,8 @@
     <title>{{ $title ?? 'SandLab' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {{-- Head partial: CSS tema, icons, dll. --}}
+    {{-- Head --}}
     @include('components.head')
-
 </head>
 
 <body data-sidebar="dark">
@@ -21,6 +20,7 @@
         {{-- Content --}}
         <div class="main-content">
             {{ $slot }}
+            {{-- Footer --}}
             @include('components.footer')
         </div>
     </div>
@@ -31,16 +31,10 @@
     {{-- Overlay --}}
     <div class="rightbar-overlay"></div>
 
-    {{-- Vendor scripts + Livewire scripts (pipeline statis) --}}
+    {{-- Scripts --}}
     @include('components.scripts')
 
-    {{-- ============================================
-         Vite entry untuk resources/js/greensand.js
-         (biarkan vendor pipeline statis tetap jalan)
-       ============================================ --}}
-
-
-    {{-- Stack untuk script halaman spesifik --}}
+    {{-- Stack --}}
     @stack('scripts')
 </body>
 </html>

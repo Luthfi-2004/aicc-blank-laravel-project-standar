@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-body">
 
-    {{-- TAB NAVIGATION (tetap) --}}
+    {{-- Tabs --}}
     <ul class="nav nav-tabs mb-3">
       <li class="nav-item">
         <a href="#" class="nav-link {{ $activeTab === 'mm1' ? 'active' : '' }}" wire:click.prevent="setActiveTab('mm1')">
@@ -20,14 +20,12 @@
       </li>
     </ul>
 
-    {{-- HAPUS blok PERPAGE & SEARCH Livewire karena akan ditangani DataTables --}}
-
-    {{-- DATA TABLE (full DataTables) --}}
+    {{-- Tabel --}}
     <div class="table-responsive">
       <table id="datatable1" class="table table-bordered dt-responsive nowrap" style="border-collapse:collapse; width:100%;">
         @includeIf('livewire.greensand._thead')
         <tbody>
-          {{-- PENTING: $currentRows harus berisi SEMUA baris hasil filter (bukan paginate) --}}
+          {{-- Baris --}}
           @forelse ($currentRows as $row)
             <tr wire:key="row-{{ $row->id }}">
               <td class="text-center">
@@ -41,7 +39,7 @@
                 </div>
               </td>
 
-              {{-- KOLOM DATA --}}
+              {{-- Kolom --}}
               <td class="text-center">{{ optional($row->process_date)->format('Y-m-d') }}</td>
               <td class="text-center">{{ $row->shift }}</td>
               <td class="text-center">{{ $row->mm_no }}</td>
@@ -81,14 +79,14 @@
               <td class="text-center">{{ $row->temp_bc11 }}</td>
             </tr>
           @empty
+            {{-- Kosong --}}
             <tr>
-              <td colspan="36" class="text-center text-muted">Belum ada data.</td>
+              <td colspan="38" class="text-center text-muted">Belum ada data.</td>
             </tr>
           @endforelse
         </tbody>
       </table>
     </div>
 
-    {{-- HAPUS blok PAGINATION Livewire karena paging ditangani DataTables --}}
   </div>
 </div>

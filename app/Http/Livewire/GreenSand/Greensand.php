@@ -7,7 +7,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\On;
+use Illuminate\Database\Eloquent\Builder;
 
 class Greensand extends Component
 {
@@ -15,26 +15,27 @@ class Greensand extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    // ===== UI State =====
-    public string $activeTab = 'mm1';   // 'mm1' | 'mm2' | 'all'
+    // State
+    public string $activeTab = 'mm1';
     public string $modalTab = 'mm';
     public string $formMode = 'create';
     public ?int $editingId = null;
 
-    // Tabel controls
+    // Control
     public string $search = '';
     public int $perPage = 10;
     public string $searchText = '';
 
-    // ===== Filter tanggal & shift =====
-    public ?string $start_date = null;  // Y-m-d
-    public ?string $end_date = null;  // Y-m-d
-    public ?string $filter_shift = null;  // 'Day' | 'Night' | null
+    // Filter
+    public ?string $start_date = null;
+    public ?string $end_date = null;
+    public ?string $filter_shift = null;
     public bool $filterOpen = true;
-    // ===== Konfirmasi delete =====
+
+    // Delete
     public ?int $pendingDeleteId = null;
 
-    // ===== Query String =====
+    // Query
     protected array $queryString = [
         'activeTab' => ['except' => 'mm1'],
         'search' => ['except' => ''],
@@ -44,18 +45,15 @@ class Greensand extends Component
         'filter_shift' => ['except' => null],
     ];
 
-    // ===== Form State =====
+    // Form
     public array $form = [
-        // Header
         'process_date' => null,
         'shift' => '',
         'plant' => 0,
-        'mm_no' => 1,   // integer 1/2
+        'mm_no' => 1,
         'mix_no' => null,
         'mix_start_t' => null,
         'mix_finish_t' => null,
-
-        // MM sample
         'sample_p' => null,
         'sample_c' => null,
         'sample_gt' => null,
@@ -70,21 +68,15 @@ class Greensand extends Component
         'cb_weight' => null,
         'tp50_weight' => null,
         'ssi' => null,
-
-        // Additive
         'additive_m3' => null,
         'additive_vsd' => null,
         'additive_sc' => null,
-
-        // BC
         'bc12_cb' => null,
         'bc12_m' => null,
         'bc11_ac' => null,
         'bc11_vsd' => null,
         'bc16_cb' => null,
         'bc16_m' => null,
-
-        // Return
         'return_time_t' => null,
         'model_type' => null,
         'moisture_bc9' => null,
@@ -95,11 +87,10 @@ class Greensand extends Component
         'temp_bc11' => null,
     ];
 
-    // ===== Rules =====
+    // Rules
     protected function rules(): array
     {
         return [
-            // Header
             'form.process_date' => ['required', 'date'],
             'form.shift' => ['required', Rule::in(['Day', 'Night'])],
             'form.plant' => ['required', 'integer', 'in:0,1'],
@@ -107,8 +98,6 @@ class Greensand extends Component
             'form.mix_no' => ['required', 'integer', 'min:1'],
             'form.mix_start_t' => ['nullable', 'date_format:H:i'],
             'form.mix_finish_t' => ['nullable', 'date_format:H:i'],
-
-            // MM sample
             'form.sample_p' => ['nullable', 'numeric'],
             'form.sample_c' => ['nullable', 'numeric'],
             'form.sample_gt' => ['nullable', 'numeric'],
@@ -123,21 +112,15 @@ class Greensand extends Component
             'form.cb_weight' => ['nullable', 'numeric'],
             'form.tp50_weight' => ['nullable', 'numeric'],
             'form.ssi' => ['nullable', 'numeric'],
-
-            // Additive
             'form.additive_m3' => ['nullable', 'numeric'],
             'form.additive_vsd' => ['nullable', 'numeric'],
             'form.additive_sc' => ['nullable', 'numeric'],
-
-            // BC
             'form.bc12_cb' => ['nullable', 'numeric'],
             'form.bc12_m' => ['nullable', 'numeric'],
             'form.bc11_ac' => ['nullable', 'numeric'],
             'form.bc11_vsd' => ['nullable', 'numeric'],
             'form.bc16_cb' => ['nullable', 'numeric'],
             'form.bc16_m' => ['nullable', 'numeric'],
-
-            // Return
             'form.return_time_t' => ['nullable', 'date_format:H:i'],
             'form.model_type' => ['nullable', 'string', 'max:20'],
             'form.moisture_bc9' => ['nullable', 'numeric'],
@@ -149,13 +132,14 @@ class Greensand extends Component
         ];
     }
 
-    // ====== Modal Confirm Delete ======
+    // Modal
     public function confirmDelete(int $id): void
     {
         $this->pendingDeleteId = $id;
         $this->dispatch('gs:confirm-open');
     }
 
+    // Modal
     public function deleteConfirmed(): void
     {
         if ($this->pendingDeleteId) {
@@ -165,23 +149,26 @@ class Greensand extends Component
         $this->dispatch('gs:confirm-close');
     }
 
+    // Modal
     public function cancelDelete(): void
     {
         $this->pendingDeleteId = null;
         $this->dispatch('gs:confirm-close');
     }
 
-    // ====== Actions (Modal/Form) ======
+    // Modal
     public function setMm(int $mm): void
     {
-        $this->form['mm_no'] = in_array($mm, [1, 2]) ? $mm : 1;
+        $this->form['mm_no'] = in_array($mm, [1, 2], true) ? $mm : 1;
     }
 
+    // Modal
     public function setModalTab(string $tab): void
     {
         $this->modalTab = $tab;
     }
 
+    // Modal
     public function create(): void
     {
         $this->resetForm();
@@ -189,6 +176,7 @@ class Greensand extends Component
         $this->dispatch('gs:open');
     }
 
+    // Modal
     public function edit(int $id): void
     {
         $row = Process::findOrFail($id);
@@ -206,7 +194,6 @@ class Greensand extends Component
             'mix_no' => $row->mix_no,
             'mix_start_t' => $row->mix_start ? $row->mix_start->format('H:i') : null,
             'mix_finish_t' => $row->mix_finish ? $row->mix_finish->format('H:i') : null,
-
             'sample_p' => $row->sample_p,
             'sample_c' => $row->sample_c,
             'sample_gt' => $row->sample_gt,
@@ -221,18 +208,15 @@ class Greensand extends Component
             'cb_weight' => $row->cb_weight,
             'tp50_weight' => $row->tp50_weight,
             'ssi' => $row->ssi,
-
             'additive_m3' => $row->additive_m3,
             'additive_vsd' => $row->additive_vsd,
             'additive_sc' => $row->additive_sc,
-
             'bc12_cb' => $row->bc12_cb,
             'bc12_m' => $row->bc12_m,
             'bc11_ac' => $row->bc11_ac,
             'bc11_vsd' => $row->bc11_vsd,
             'bc16_cb' => $row->bc16_cb,
             'bc16_m' => $row->bc16_m,
-
             'return_time_t' => $row->return_time ? $row->return_time->format('H:i') : null,
             'model_type' => $row->model_type,
             'moisture_bc9' => $row->moisture_bc9,
@@ -246,12 +230,14 @@ class Greensand extends Component
         $this->dispatch('gs:open');
     }
 
+    // Delete
     public function delete(int $id): void
     {
         Process::whereKey($id)->delete();
         $this->dispatch('gs:toast', ['type' => 'success', 'text' => 'Data dihapus']);
     }
 
+    // Submit
     public function submit(): void
     {
         $this->validate();
@@ -261,7 +247,7 @@ class Greensand extends Component
         $returnAt = $this->combineDateTime($this->form['process_date'], $this->form['return_time_t']);
 
         $exists = Process::query()
-            ->when($this->formMode === 'edit', fn($q) => $q->where('id', '!=', $this->editingId))
+            ->when($this->formMode === 'edit', fn (Builder $q) => $q->where('id', '!=', $this->editingId))
             ->where('process_date', $this->form['process_date'])
             ->where('shift', $this->form['shift'])
             ->where('plant', $this->form['plant'])
@@ -275,7 +261,6 @@ class Greensand extends Component
         }
 
         $payload = [
-            // Header
             'process_date' => $this->form['process_date'],
             'shift' => $this->form['shift'],
             'plant' => $this->form['plant'],
@@ -283,8 +268,6 @@ class Greensand extends Component
             'mix_no' => $this->form['mix_no'],
             'mix_start' => $mixStart,
             'mix_finish' => $mixFinish,
-
-            // MM sample
             'sample_p' => $this->form['sample_p'],
             'sample_c' => $this->form['sample_c'],
             'sample_gt' => $this->form['sample_gt'],
@@ -299,21 +282,15 @@ class Greensand extends Component
             'cb_weight' => $this->form['cb_weight'],
             'tp50_weight' => $this->form['tp50_weight'],
             'ssi' => $this->form['ssi'],
-
-            // Additive
             'additive_m3' => $this->form['additive_m3'],
             'additive_vsd' => $this->form['additive_vsd'],
             'additive_sc' => $this->form['additive_sc'],
-
-            // BC
             'bc12_cb' => $this->form['bc12_cb'],
             'bc12_m' => $this->form['bc12_m'],
             'bc11_ac' => $this->form['bc11_ac'],
             'bc11_vsd' => $this->form['bc11_vsd'],
             'bc16_cb' => $this->form['bc16_cb'],
             'bc16_m' => $this->form['bc16_m'],
-
-            // Return
             'return_time' => $returnAt,
             'model_type' => $this->form['model_type'],
             'moisture_bc9' => $this->form['moisture_bc9'],
@@ -337,7 +314,7 @@ class Greensand extends Component
         $this->resetForm();
     }
 
-    // ===== Search (berdasar UX Anda) =====
+    // Search
     public function applySearch(): void
     {
         $this->validate([
@@ -346,10 +323,12 @@ class Greensand extends Component
             'filter_shift' => ['nullable', 'in:Day,Night'],
             'searchText' => ['nullable', 'string', 'max:100'],
         ]);
+
         $this->search = trim($this->searchText);
         $this->resetAllPages();
     }
 
+    // Search
     public function clearSearch(): void
     {
         $this->searchText = '';
@@ -357,7 +336,7 @@ class Greensand extends Component
         $this->resetAllPages();
     }
 
-    // ===== Filter =====
+    // Filter
     public function setDateRange(?string $start, ?string $end): void
     {
         $this->start_date = $start ?: null;
@@ -365,12 +344,14 @@ class Greensand extends Component
         $this->resetAllPages();
     }
 
+    // Filter
     public function setFilterShift(?string $shift): void
     {
         $this->filter_shift = $shift ?: null;
         $this->resetAllPages();
     }
 
+    // Filter
     public function clearFilters(): void
     {
         $this->start_date = null;
@@ -380,6 +361,7 @@ class Greensand extends Component
         $this->dispatch('gs:toast', ['type' => 'info', 'text' => 'Filter cleared']);
     }
 
+    // Export
     public function export(): void
     {
         $params = array_filter([
@@ -388,82 +370,78 @@ class Greensand extends Component
             'shift' => $this->filter_shift ?: null,
             'q' => $this->search !== '' ? $this->search : null,
             'mm' => ($this->activeTab === 'mm1') ? 1 : (($this->activeTab === 'mm2') ? 2 : null),
-        ], fn($v) => filled($v));
+        ], fn ($v) => filled($v));
 
         $url = route('greensand.export', $params);
         $this->dispatch('gs:export', url: $url);
     }
 
-    // ===== Pagination & Tab =====
+    // Tab
     public function setActiveTab(string $tab): void
     {
-        $this->activeTab = in_array($tab, ['mm1', 'mm2', 'all']) ? $tab : 'mm1';
+        $this->activeTab = in_array($tab, ['mm1', 'mm2', 'all'], true) ? $tab : 'mm1';
         $this->resetAllPages();
     }
 
+    // Tab
     protected function resetAllPages(): void
     {
-        // pastikan tiap paginator balik ke halaman 1
         $this->gotoPage(1, 'rowsMm1');
         $this->gotoPage(1, 'rowsMm2');
         $this->gotoPage(1, 'rowsAll');
     }
 
+    // Tab
     public function updatedSearch(): void
     {
         $this->search = trim($this->search);
         $this->resetAllPages();
     }
 
+    // Tab
     public function updatedPerPage(): void
     {
         $this->resetAllPages();
     }
 
-    // ===== Helpers: Query builder =====
-    protected function baseQuery()
+    // Builder
+    protected function baseQuery(): Builder
     {
         $q = Process::query();
 
-        // Filter tanggal
         if ($this->start_date) {
             $q->whereDate('process_date', '>=', $this->start_date);
         }
         if ($this->end_date) {
             $q->whereDate('process_date', '<=', $this->end_date);
         }
-
-        // Filter shift
         if ($this->filter_shift) {
             $q->where('shift', $this->filter_shift);
         }
-
-        // Search (mix_no / model_type / shift)
         if ($this->search !== '') {
             $keyword = '%' . $this->search . '%';
             $q->where(function ($x) use ($keyword) {
                 $x->where('mix_no', 'like', $keyword)
-                    ->orWhere('model_type', 'like', $keyword)
-                    ->orWhere('shift', 'like', $keyword);
+                  ->orWhere('model_type', 'like', $keyword)
+                  ->orWhere('shift', 'like', $keyword);
             });
         }
 
         return $q;
     }
 
-    protected function applyMmFilter($query, string $mm): void
+    // Builder
+    protected function applyMmFilter(Builder $query, string $mm): void
     {
-        // mm = 'mm1' atau 'mm2'
         $num = ($mm === 'mm1') ? 1 : 2;
 
-        // Kolom mm_no di DB Anda bertipe integer (berdasar form), jadi langsung where int.
-        // Tetap tambahkan toleransi jika ternyata string/format lain.
         $query->where(function ($w) use ($num, $mm) {
             $w->where('mm_no', $num)
-                ->orWhereRaw("LOWER(REPLACE(CAST(mm_no AS CHAR), ' ', '')) = ?", [$mm]); // jaga-jaga jika string "MM 1"
+              ->orWhereRaw("LOWER(REPLACE(CAST(mm_no AS CHAR), ' ', '')) = ?", [$mm]);
         });
     }
 
+    // Helper
     private function combineDateTime(?string $date, ?string $time): ?string
     {
         if (!$date || !$time) {
@@ -472,6 +450,7 @@ class Greensand extends Component
         return $date . ' ' . $time . ':00';
     }
 
+    // Helper
     private function resetForm(): void
     {
         $this->editingId = null;
@@ -486,7 +465,6 @@ class Greensand extends Component
             'mix_finish_t' => null,
             'return_time_t' => null,
             'model_type' => null,
-
             'sample_p' => null,
             'sample_c' => null,
             'sample_gt' => null,
@@ -501,7 +479,6 @@ class Greensand extends Component
             'cb_weight' => null,
             'tp50_weight' => null,
             'ssi' => null,
-
             'additive_m3' => null,
             'additive_vsd' => null,
             'additive_sc' => null,
@@ -511,7 +488,6 @@ class Greensand extends Component
             'bc11_vsd' => null,
             'bc16_cb' => null,
             'bc16_m' => null,
-
             'moisture_bc9' => null,
             'moisture_bc10' => null,
             'moisture_bc11' => null,
@@ -521,6 +497,7 @@ class Greensand extends Component
         ]);
     }
 
+    // Helper
     public function updatedStartDate($value): void
     {
         if (!$value) {
@@ -532,6 +509,7 @@ class Greensand extends Component
         }
     }
 
+    // Helper
     public function updatedEndDate($value): void
     {
         if ($this->start_date && $value < $this->start_date) {
@@ -539,6 +517,7 @@ class Greensand extends Component
         }
     }
 
+    // Helper
     private function normalizeDateRange(): void
     {
         if ($this->start_date && (!$this->end_date || $this->end_date < $this->start_date)) {
@@ -546,17 +525,18 @@ class Greensand extends Component
         }
     }
 
-    // ===== RENDER (3 tab: mm1, mm2, all) =====
+    // Render
     public function render()
     {
         $this->normalizeDateRange();
 
-        $base = $this->baseQuery()->orderByDesc('process_date')->orderByDesc('mix_no');
+        $base = $this->baseQuery()
+            ->orderByDesc('process_date')
+            ->orderByDesc('mix_no');
 
         if ($this->activeTab === 'mm1') {
             $q1 = (clone $base);
             $this->applyMmFilter($q1, 'mm1');
-
             $rowsMm1 = $q1->paginate($this->perPage, ['*'], 'rowsMm1');
 
             return view('livewire.greensand.green-sand', [
@@ -568,7 +548,6 @@ class Greensand extends Component
         if ($this->activeTab === 'mm2') {
             $q2 = (clone $base);
             $this->applyMmFilter($q2, 'mm2');
-
             $rowsMm2 = $q2->paginate($this->perPage, ['*'], 'rowsMm2');
 
             return view('livewire.greensand.green-sand', [
@@ -577,7 +556,6 @@ class Greensand extends Component
             ]);
         }
 
-        // Tab ALL (tanpa filter mm)
         $rowsAll = $base->paginate($this->perPage, ['*'], 'rowsAll');
 
         return view('livewire.greensand.green-sand', [
