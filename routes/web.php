@@ -10,3 +10,4 @@ Route::get('/', Dashboard::class)->name('dashboard');
 Route::get('/login', Login::class)->name('login');
 Route::get('/greensand', Greensand::class)->name('greensand.index');
 Route::get('/greensand/export', [GreensandExportController::class, 'download'])->name('greensand.export');
+

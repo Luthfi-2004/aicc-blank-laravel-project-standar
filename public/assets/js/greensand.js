@@ -148,9 +148,10 @@ window.addEventListener("gs:export", (e) => {
 });
 
 /* =======================================================
-   DataTables (MODE B: client-side) - clean & predictable
+   DataTables (MODE B: client-side) - stable & race-free
    - stateSave per tab (mm1/mm2/all) via localStorage
-   - destroy(true) ONLY tepat sebelum re-render, lalu init
+   - Destroy hanya di morph.removing (v3) / navigated
+   - Re-init via processed + MutationObserver + retry
 ======================================================= */
 (function attachDataTablesClientSide() {
     const $ = window.jQuery;
@@ -159,23 +160,22 @@ window.addEventListener("gs:export", (e) => {
     const TABLE_ID = "#datatable1";
 
     function isDT() {
-        try {
-            return $.fn.DataTable.isDataTable(TABLE_ID);
-        } catch (_) {
-            return false;
-        }
+        try { return $.fn.DataTable.isDataTable(TABLE_ID); }
+        catch (_) { return false; }
+    }
+
+    function markInit(flag) {
+        $(TABLE_ID).data("dt-initialized", !!flag);
     }
 
     function destroyDT() {
         try {
             if (isDT()) {
-                $(TABLE_ID).DataTable().clear().destroy(true); // buang wrapper lama
+                $(TABLE_ID).DataTable().clear().destroy(true);
             }
         } catch (_) {}
-        // bersihkan width inline biar kolom tidak ngunci
         $(TABLE_ID).find("thead th, tbody td").css("width", "");
-        // tandai status
-        $(TABLE_ID).data("dt-initialized", false);
+        markInit(false);
     }
 
     function isReady() {
@@ -184,11 +184,7 @@ window.addEventListener("gs:export", (e) => {
         return !!(t && t.tHead && t.tBodies && t.tBodies[0]);
     }
 
-    function initDT() {
-        if (!isReady()) return;
-        if (isDT()) return;
-        if ($(TABLE_ID).data("dt-initialized") === true) return;
-
+    function buildOptions() {
         const $tbl = $(TABLE_ID);
         const tab = ($tbl.data("tab") || "all").toString(); // mm1|mm2|all
         const storageKey = `dt:datatable1:${tab}`;
@@ -203,24 +199,17 @@ window.addEventListener("gs:export", (e) => {
             scrollX: true,
             lengthMenu: [10, 25, 50, 100],
             pageLength: 10,
-
-            // state per-tab
             stateSave: true,
             stateDuration: -1,
             stateSaveCallback: function (_s, data) {
-                try {
-                    localStorage.setItem(storageKey, JSON.stringify(data));
-                } catch (e) {}
+                try { localStorage.setItem(storageKey, JSON.stringify(data)); } catch (_e) {}
             },
             stateLoadCallback: function () {
                 try {
                     const raw = localStorage.getItem(storageKey);
                     return raw ? JSON.parse(raw) : null;
-                } catch (e) {
-                    return null;
-                }
+                } catch (_e) { return null; }
             },
-
             
         };
 
@@ -239,53 +228,74 @@ window.addEventListener("gs:export", (e) => {
                 "<'row'<'col-sm-6'l><'col-sm-6'f>>" +
                 "tr<'row'<'col-sm-5'i><'col-sm-7'p>>";
         }
-
-        $tbl.DataTable(opts);
-        $tbl.data("dt-initialized", true);
+        return opts;
     }
 
-    // ===== siklus yang jelas: destroy -> init =====
+    // Retry init sampai DOM stabil (menghindari race)
+    function initDT(retry = 0) {
+        if (isDT() || $(TABLE_ID).data("dt-initialized") === true) return;
+        if (!isReady()) {
+            if (retry < 10) setTimeout(() => initDT(retry + 1), 50);
+            return;
+        }
+        $(TABLE_ID).DataTable(buildOptions());
+        markInit(true);
+    }
 
-    // 1) DOM siap pertama kali
+    // ===== Lifecycle yang konsisten =====
+
+    // 1) First paint
     document.addEventListener("DOMContentLoaded", () => {
         // jangan destroy di sini — cukup init
-        setTimeout(initDT, 120);
+        setTimeout(() => initDT(0), 100);
     });
 
-    // 2) Livewire v2: setelah DOM selesai di-patch → init
+    // 2) Livewire v2/v3: setelah patch selesai → INIT SAJA
+    //    (JANGAN destroy di sini, biar tidak balapan dengan morph.added)
     window.Livewire?.hook?.("message.processed", () => {
-        // sebelum re-render Livewire, instance lama biasanya sudah “copot”
-        // untuk aman, destroy dulu lalu init
-        destroyDT();
-        setTimeout(initDT, 80);
+        // gunakan microtask + RAF agar benar-benar setelah DOM settle
+        Promise.resolve().then(() => {
+            requestAnimationFrame(() => initDT(0));
+        });
     });
 
-    // 3) Livewire v3 (morph lifecycle)
+    // 3) Livewire v3: sebelum node lama dibuang → DESTROY
     if (window.Livewire?.hook) {
-        // sebelum node lama dilepas (kalau tabel akan diganti), destroy
         window.Livewire.hook("morph.removing", (el) => {
-            if (
-                el &&
-                (el.matches?.(TABLE_ID) || el.querySelector?.(TABLE_ID))
-            ) {
+            if (el && (el.matches?.(TABLE_ID) || el.querySelector?.(TABLE_ID))) {
                 destroyDT();
             }
         });
-        // setelah node baru masuk/diupdate → init
-        window.Livewire.hook("morph.added", () => setTimeout(initDT, 80));
-        window.Livewire.hook("morph.updated", () => setTimeout(initDT, 80));
+        window.Livewire.hook("morph.added", () => initDT(0));
+        window.Livewire.hook("morph.updated", () => initDT(0));
     }
 
-    // 4) Navigasi Livewire (jika dipakai)
+    // 4) Navigasi Livewire
     document.addEventListener("livewire:navigated", () => {
         destroyDT();
-        setTimeout(initDT, 100);
+        setTimeout(() => initDT(0), 120);
     });
 
-    // 5) Event manual (opsional)
+    // 5) Observer: bila Livewire hanya ganti TBODY / TH
+    (function ensureObserver() {
+        const $tbl = $(TABLE_ID);
+        if (!$tbl.length || $tbl.data("dt-observer")) return;
+
+        const t = $tbl[0];
+        const obs = new MutationObserver((muts) => {
+            // jika wrapper DT copot atau TBODY/HEAD berubah, coba init ulang
+            const need = muts.some(m => m.type === "childList" || m.type === "attributes");
+            if (need) initDT(0);
+        });
+        obs.observe(t, { childList: true, subtree: true, attributes: true });
+        $tbl.data("dt-observer", obs);
+    })();
+
+    // 6) Event manual (opsional)
     document.addEventListener("gs:before-redraw", () => destroyDT());
-    document.addEventListener("gs:after-redraw", () => setTimeout(initDT, 80));
+    document.addEventListener("gs:after-redraw", () => setTimeout(() => initDT(0), 80));
 })();
+
 
 /* =======================================================
    DELETE FLOW (tanpa alert Edge)

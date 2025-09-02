@@ -25,12 +25,8 @@
     </ul>
 
     {{-- Tabel --}}
-    <div class="table-responsive">
-      <table id="datatable1"
-       class="table table-bordered dt-responsive nowrap mb-0"
-       style="border-collapse:collapse; width:100%;"
-       data-tab="{{ $activeTab }}"
-       wire:key="gs-table-{{ $activeTab }}">
+<div class="table-responsive" wire:ignore.self>
+    <table id="datatable1" class="table table-striped" data-tab="{{ $currentTab ?? 'all' }}">
 
         @includeIf('livewire.greensand._thead')
 

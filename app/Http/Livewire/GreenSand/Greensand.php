@@ -110,7 +110,7 @@ class Greensand extends Component
             'form.vsd_mm' => ['nullable', 'numeric'],
             'form.sample_ig' => ['nullable', 'numeric'],
             'form.cb_weight' => ['nullable', 'numeric'],
-            'tp50_weight' => ['nullable', 'numeric'],
+            'form.tp50_weight' => ['nullable', 'numeric'],
             'form.ssi' => ['nullable', 'numeric'],
             'form.additive_m3' => ['nullable', 'numeric'],
             'form.additive_vsd' => ['nullable', 'numeric'],

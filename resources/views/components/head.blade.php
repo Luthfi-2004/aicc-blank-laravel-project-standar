@@ -25,4 +25,5 @@
 <link rel="stylesheet" href="{{ asset('assets/css/gfont-nunito.css') }}">
 <link rel="icon" type="image/png" href="{{ asset('assets/images/favicon.png') }}">
 
+<link rel="stylesheet" href="{{ asset('assets/libs/toastr/build/toastr.min.css') }}">
 @livewireStyles
