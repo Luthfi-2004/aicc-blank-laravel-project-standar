@@ -45,14 +45,9 @@
                 @error('form.shift') <div class="invalid-feedback">{{ $message }}</div> @enderror
               </div>
 
-              {{-- Tanggal --}}
-              <div class="col-md-3 mb-2">
-                <label class="form-label mb-1">Process Date</label>
-                <input type="date"
-                       class="form-control @error('form.process_date') is-invalid @enderror"
-                       wire:model.defer="form.process_date" autocomplete="off">
-                @error('form.process_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
-              </div>
+              {{-- Process Date (auto today, hidden) --}}
+<input type="hidden" wire:model.defer="form.process_date">
+
 
               {{-- Mix --}}
               <div class="col-md-2 mb-2">
