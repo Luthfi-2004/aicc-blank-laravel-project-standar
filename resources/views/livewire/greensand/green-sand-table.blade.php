@@ -90,7 +90,7 @@
                                     </button>
                                 </div>
                             </td>
-                            <td class="text-center">{{ $row->process_date?->format('d-m-Y H:i:s') }}</td>
+                            <td class="text-center">{{ $row->process_date?->format('m-d-Y H:i:s') }}</td>
                             <td class="text-center">{{ $row->shift }}</td>
                             <td class="text-center">{{ $row->mm_no }}</td>
                             <td class="text-center">{{ $row->mix_no }}</td>
@@ -128,10 +128,8 @@
                             <td class="text-center">{{ $row->temp_bc10 }}</td>
                             <td class="text-center">{{ $row->temp_bc11 }}</td>
                         </tr>
+                        <!-- PERMASALAHAN SEMUA DI SINI PERKARANYA -->
                     @empty
-                        <tr>
-                            <td class="text-center" colspan="38">No data available.</td>
-                        </tr>
                     @endforelse
                 </tbody>
             </table>
