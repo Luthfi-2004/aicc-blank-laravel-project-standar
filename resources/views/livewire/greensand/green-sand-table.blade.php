@@ -101,12 +101,12 @@
                             </td>
 
                             {{-- Data utama --}}
-                            <td class="text-center">{{ optional($row->process_date)->format('Y-m-d h:i:s') }}</td>
+                            <td class="text-center">{{ $row->process_date?->setTimezone('Asia/Jakarta')?->format('d-m-Y H:i') }}</td>
                             <td class="text-center">{{ $row->shift }}</td>
                             <td class="text-center">{{ $row->mm_no }}</td>
                             <td class="text-center">{{ $row->mix_no }}</td>
-                            <td class="text-center">{{ optional($row->mix_start)->format('H:i') }}</td>
-                            <td class="text-center">{{ optional($row->mix_finish)->format('H:i') }}</td>
+                            <td class="text-center">{{ $row->mix_start?->setTimezone('Asia/Jakarta')?->format('H:i') ?? '-' }}</td>
+                            <td class="text-center">{{ $row->mix_finish?->setTimezone('Asia/Jakarta')?->format('H:i') ?? '-' }}</td>
 
                             {{-- MM Sample --}}
                             <td class="text-center">{{ $row->sample_p }}</td>
@@ -138,7 +138,7 @@
                             <td class="text-center">{{ $row->bc16_m }}</td>
 
                             {{-- Return Sand --}}
-                            <td class="text-center">{{ optional($row->return_time)->format('H:i') }}</td>
+                            <td class="text-center">{{ $row->return_time?->setTimezone('Asia/Jakarta')?->format('H:i') ?? '-' }}</td>
                             <td class="text-center">{{ $row->model_type }}</td>
                             <td class="text-center">{{ $row->moisture_bc9 }}</td>
                             <td class="text-center">{{ $row->moisture_bc10 }}</td>

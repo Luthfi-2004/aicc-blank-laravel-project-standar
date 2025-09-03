@@ -41,6 +41,7 @@
                                     <option value="" disabled {{ $form['shift'] === '' ? 'selected' : '' }}>--
                                         Select Shift --</option>
                                     <option value="D">Day</option>
+                                    <option value="S">Subuh</option>
                                     <option value="N">Night</option>
                                 </select>
                                 @error('form.shift')

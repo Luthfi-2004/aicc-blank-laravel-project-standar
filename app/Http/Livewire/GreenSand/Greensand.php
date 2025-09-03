@@ -81,7 +81,7 @@ class Greensand extends Component
     {
         return [
             'form.process_date' => ['required', 'date'],
-            'form.shift' => ['required', Rule::in(['D','S','N'])],
+            'form.shift' => ['required', Rule::in(['D', 'S', 'N'])],
             'form.plant' => ['required', 'integer', 'in:0,1'],
             'form.mm_no' => ['required', 'integer', 'in:1,2'],
             'form.mix_no' => ['required', 'integer', 'min:1'],
@@ -161,6 +161,7 @@ class Greensand extends Component
 
     public function edit(int $id): void
     {
+
         $row = Process::findOrFail($id);
 
         $this->activeTab = ((int) $row->mm_no === 1) ? 'mm1' : 'mm2';
@@ -221,7 +222,7 @@ class Greensand extends Component
     public function submit(): void
     {
         if ($this->formMode === 'create') {
-    $this->form['process_date'] = Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s');
+            $this->form['process_date'] = Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s');
         }
 
 
@@ -305,7 +306,7 @@ class Greensand extends Component
         $this->validate([
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
-            'filter_shift' => ['nullable', 'in:Day,Night'],
+            'filter_shift' => ['nullable', 'in:D,S,N'],
             'searchText' => ['nullable', 'string', 'max:100'],
         ]);
 
@@ -332,14 +333,14 @@ class Greensand extends Component
     public function clearFilters(): void
     {
         $this->start_date = null;
-               $this->end_date = null;
+        $this->end_date = null;
         $this->filter_shift = null;
         $this->dispatch('gs:toast', ['type' => 'info', 'text' => 'Filter cleared']);
     }
 
     public function setActiveTab(string $tab): void
     {
-        if (in_array($tab, ['mm1','mm2','all'], true)) {
+        if (in_array($tab, ['mm1', 'mm2', 'all'], true)) {
             $this->activeTab = $tab;
         }
     }
@@ -372,7 +373,7 @@ class Greensand extends Component
 
         $query->where(function ($w) use ($num, $mm) {
             $w->where('mm_no', $num)
-              ->orWhereRaw("LOWER(REPLACE(CAST(mm_no AS CHAR), ' ', '')) = ?", [$mm]);
+                ->orWhereRaw("LOWER(REPLACE(CAST(mm_no AS CHAR), ' ', '')) = ?", [$mm]);
         });
     }
 
@@ -453,10 +454,10 @@ class Greensand extends Component
         return Excel::download(
             new GreensandExportFull(
                 start: $this->start_date,
-                end:   $this->end_date,
+                end: $this->end_date,
                 shift: $this->filter_shift,
-                q:     $this->search !== '' ? $this->search : null,
-                mm:    $mm
+                q: $this->search !== '' ? $this->search : null,
+                mm: $mm
             ),
             $filename
         );

@@ -393,3 +393,5 @@ window.addEventListener("gs:export", (e) => {
         document.body.focus();
     });
 })();
+
+// select2
