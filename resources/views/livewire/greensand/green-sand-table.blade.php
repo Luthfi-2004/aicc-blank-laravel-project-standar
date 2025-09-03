@@ -1,36 +1,30 @@
-{{-- resources/views/livewire/greensand/green-sand-table.blade.php --}}
 <div class="card">
     <div class="card-body">
 
-        {{-- Tabs --}}
         <ul class="nav nav-tabs mb-3">
             <li class="nav-item">
                 <a href="#" class="nav-link {{ $activeTab === 'mm1' ? 'active' : '' }}"
-                    wire:click.prevent="setActiveTab('mm1')">
+                   wire:click.prevent="setActiveTab('mm1')">
                     <i class="ri-layout-grid-line mr-1"></i> MM 1
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#" class="nav-link {{ $activeTab === 'mm2' ? 'active' : '' }}"
-                    wire:click.prevent="setActiveTab('mm2')">
+                   wire:click.prevent="setActiveTab('mm2')">
                     <i class="ri-layout-grid-fill mr-1"></i> MM 2
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#" class="nav-link {{ $activeTab === 'all' ? 'active' : '' }}"
-                    wire:click.prevent="setActiveTab('all')">
+                   wire:click.prevent="setActiveTab('all')">
                     <i class="ri-stack-line mr-1"></i> All
                 </a>
             </li>
         </ul>
 
-        {{-- =========== TABLE (single source of truth) =========== --}}
-        {{-- wire:key berubah tiap state → node lama dibuang (morph.removing) --}}
         <div class="table-responsive">
             <table id="datatable1" class="table table-bordered" data-tab="{{ $activeTab }}"
-                wire:key="gs-table-{{ $activeTab }}">
-
-                {{-- THEAD (dipindah dari _thead.blade.php) --}}
+                   wire:key="gs-table-{{ $activeTab }}">
                 <thead class="table-dark">
                     <tr>
                         <th class="text-center align-middle" rowspan="2" style="min-width:120px;">Action</th>
@@ -79,36 +73,29 @@
                         <th class="text-center" style="min-width:120px;">Temp BC11</th>
                     </tr>
                 </thead>
-
-                {{-- TBODY --}}
                 <tbody>
                     @forelse ($currentRows as $row)
                         <tr wire:key="row-{{ $row->id }}">
-                            {{-- Action --}}
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
                                     <button class="btn btn-outline-warning btn-sm mr-2"
-                                        wire:click="edit({{ $row->id }})" title="Edit">
+                                            wire:click="edit({{ $row->id }})" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-outline-danger btn-sm js-delete"
-                                        data-id="{{ $row->id }}"
-                                        data-label="(ID: {{ $row->id }}, MM: {{ $row->mm_no }})"
-                                        title="Hapus">
+                                            data-id="{{ $row->id }}"
+                                            data-label="(ID: {{ $row->id }}, MM: {{ $row->mm_no }})"
+                                            title="Hapus">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </td>
-
-                            {{-- Data utama --}}
-                            <td class="text-center">{{ $row->process_date?->setTimezone('Asia/Jakarta')?->format('d-m-Y H:i:s') }}</td>
+                            <td class="text-center">{{ $row->process_date?->format('d-m-Y H:i:s') }}</td>
                             <td class="text-center">{{ $row->shift }}</td>
                             <td class="text-center">{{ $row->mm_no }}</td>
                             <td class="text-center">{{ $row->mix_no }}</td>
-                            <td class="text-center">{{ $row->mix_start?->setTimezone('Asia/Jakarta')?->format('H:i:s') ?? '-' }}</td>
-                            <td class="text-center">{{ $row->mix_finish?->setTimezone('Asia/Jakarta')?->format('H:i:s') ?? '-' }}</td>
-
-                            {{-- MM Sample --}}
+                            <td class="text-center">{{ $row->mix_start?->format('H:i:s') ?? '-' }}</td>
+                            <td class="text-center">{{ $row->mix_finish?->format('H:i:s') ?? '-' }}</td>
                             <td class="text-center">{{ $row->sample_p }}</td>
                             <td class="text-center">{{ $row->sample_c }}</td>
                             <td class="text-center">{{ $row->sample_gt }}</td>
@@ -123,22 +110,16 @@
                             <td class="text-center">{{ $row->cb_weight }}</td>
                             <td class="text-center">{{ $row->tp50_weight }}</td>
                             <td class="text-center">{{ $row->ssi }}</td>
-
-                            {{-- Additive --}}
                             <td class="text-center">{{ $row->additive_m3 }}</td>
                             <td class="text-center">{{ $row->additive_vsd }}</td>
                             <td class="text-center">{{ $row->additive_sc }}</td>
-
-                            {{-- BC Sample --}}
                             <td class="text-center">{{ $row->bc12_cb }}</td>
                             <td class="text-center">{{ $row->bc12_m }}</td>
                             <td class="text-center">{{ $row->bc11_ac }}</td>
                             <td class="text-center">{{ $row->bc11_vsd }}</td>
                             <td class="text-center">{{ $row->bc16_cb }}</td>
                             <td class="text-center">{{ $row->bc16_m }}</td>
-
-                            {{-- Return Sand --}}
-                            <td class="text-center">{{ $row->return_time?->setTimezone('Asia/Jakarta')?->format('H:i:s') ?? '-' }}</td>
+                            <td class="text-center">{{ $row->return_time?->format('H:i:s') ?? '-' }}</td>
                             <td class="text-center">{{ $row->model_type }}</td>
                             <td class="text-center">{{ $row->moisture_bc9 }}</td>
                             <td class="text-center">{{ $row->moisture_bc10 }}</td>
@@ -148,15 +129,17 @@
                             <td class="text-center">{{ $row->temp_bc11 }}</td>
                         </tr>
                     @empty
+                        <tr>
+                            <td class="text-center" colspan="38">No data available.</td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
-    {{-- Modal Konfirmasi Hapus --}}
     <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog"
-        aria-labelledby="confirmDeleteTitle" aria-hidden="true">
+         aria-labelledby="confirmDeleteTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content border-0">
                 <div class="modal-header bg-danger text-white">
@@ -176,5 +159,4 @@
         </div>
     </div>
 
-</div>
 </div>
