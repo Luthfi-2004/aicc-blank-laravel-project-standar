@@ -62,7 +62,7 @@
                                         <input type="text" class="form-control" placeholder="keyword..."
                                             wire:model.defer="searchText" autocomplete="off">
                                         <div class="input-group-append">
-                                            <button type="button" class="btn btn-primary" wire:click="applySearch">
+                                            <button type="button" class="btn btn-primary btn-sm" wire:click="applySearch">
                                                 <i class="ri-search-line"></i>
                                             </button>
                                         </div>
