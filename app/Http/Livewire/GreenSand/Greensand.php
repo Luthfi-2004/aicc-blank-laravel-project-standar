@@ -351,10 +351,12 @@ class Greensand extends Component
         $this->dispatch('gs:toast', ['type' => 'info', 'text' => 'Filter cleared']);
     }
 
-    public function setActiveTab(string $tab): void
-    {
-        $this->activeTab = in_array($tab, ['mm1', 'mm2', 'all'], true) ? $tab : 'mm1';
+public function setActiveTab(string $tab): void
+{
+    if (in_array($tab, ['mm1','mm2','all'], true)) {
+        $this->activeTab = $tab;
     }
+}
 
     public function updatedSearch(): void
     {

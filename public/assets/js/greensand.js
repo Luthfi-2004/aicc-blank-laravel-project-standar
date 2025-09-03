@@ -147,48 +147,63 @@ window.addEventListener("gs:export", (e) => {
     if (url) window.location.href = url;
 });
 
-/* =======================================================
-   DataTables (MODE B: client-side) - stable & race-free
-   - stateSave per tab (mm1/mm2/all) via localStorage
-   - Destroy hanya di morph.removing (v3) / navigated
-   - Re-init via processed + MutationObserver + retry
-======================================================= */
 (function attachDataTablesClientSide() {
     const $ = window.jQuery;
     if (!$ || !$.fn || !$.fn.DataTable) return;
 
     const TABLE_ID = "#datatable1";
+    const INIT_FLAG = "__gs_dt_inited";
 
-    function isDT() {
-        try { return $.fn.DataTable.isDataTable(TABLE_ID); }
-        catch (_) { return false; }
-    }
+    const $tbl = () => $(TABLE_ID);
+    const el = () => document.querySelector(TABLE_ID);
 
-    function markInit(flag) {
-        $(TABLE_ID).data("dt-initialized", !!flag);
+    const isDT = () => {
+        const n = el();
+        if (!n) return false;
+        try {
+            return $.fn.DataTable.isDataTable(n);
+        } catch {
+            return false;
+        }
+    };
+
+    function sanitizeWrappers() {
+        const n = el();
+        if (!n) return;
+        // buang wrapper yatim (yang tidak lagi berisi table target)
+        document.querySelectorAll(".dataTables_wrapper").forEach((w) => {
+            if (!w.contains(n))
+                try {
+                    w.remove();
+                } catch {}
+        });
+        // kalau table masih ke-wrap tapi belum DT aktif, pastikan bersih
+        if (!isDT() && $(n).closest(".dataTables_wrapper").length) {
+            try {
+                $(n).DataTable().destroy(true);
+            } catch {}
+        }
     }
 
     function destroyDT() {
+        const n = el();
+        if (!n) return;
         try {
-            if (isDT()) {
-                $(TABLE_ID).DataTable().clear().destroy(true);
-            }
-        } catch (_) {}
-        $(TABLE_ID).find("thead th, tbody td").css("width", "");
-        markInit(false);
+            if (isDT()) $(n).DataTable().clear().destroy(true);
+        } catch {}
+        $(n).find("thead th, tbody td").css("width", "");
+        $tbl().data(INIT_FLAG, false);
+        sanitizeWrappers();
     }
 
     function isReady() {
-        const t = document.querySelector(TABLE_ID);
-        // thead & tbody harus sudah ada (tbody boleh kosong)
-        return !!(t && t.tHead && t.tBodies && t.tBodies[0]);
+        const n = el();
+        return !!(n && n.tHead && n.tBodies && n.tBodies[0]); // tbody boleh kosong
     }
 
     function buildOptions() {
-        const $tbl = $(TABLE_ID);
-        const tab = ($tbl.data("tab") || "all").toString(); // mm1|mm2|all
+        const tab = ($tbl().data("tab") || "all").toString();
         const storageKey = `dt:datatable1:${tab}`;
-
         const opts = {
             paging: true,
             searching: true,
@@ -201,18 +216,30 @@ window.addEventListener("gs:export", (e) => {
             pageLength: 10,
             stateSave: true,
             stateDuration: -1,
-            stateSaveCallback: function (_s, data) {
-                try { localStorage.setItem(storageKey, JSON.stringify(data)); } catch (_e) {}
-            },
-            stateLoadCallback: function () {
+            stateSaveCallback: (_s, data) => {
                 try {
-                    const raw = localStorage.getItem(storageKey);
-                    return raw ? JSON.parse(raw) : null;
-                } catch (_e) { return null; }
+                    localStorage.setItem(storageKey, JSON.stringify(data));
+                } catch {}
             },
-            
+            stateLoadCallback: () => {
+                try {
+                    return JSON.parse(
+                        localStorage.getItem(storageKey) || "null"
+                    );
+                } catch {
+                    return null;
+                }
+            },
+            language: {
+                search: "Search:",
+                lengthMenu: "Show _MENU_ entries",
+                info: "Showing _START_–_END_ of _TOTAL_ entries",
+                infoEmpty: "No data available",
+                zeroRecords: "No matching records found",
+                paginate: { first: "<<", last: ">>", next: ">", previous: "<" },
+                processing: "Processing...",
+            },
         };
-
         if ($.fn.dataTable && $.fn.dataTable.Buttons) {
             opts.dom =
                 "<'row'<'col-sm-6'B><'col-sm-6'f>>" +
@@ -231,70 +258,63 @@ window.addEventListener("gs:export", (e) => {
         return opts;
     }
 
-    // Retry init sampai DOM stabil (menghindari race)
     function initDT(retry = 0) {
-        if (isDT() || $(TABLE_ID).data("dt-initialized") === true) return;
+        const n = el();
+        if (!n) return;
+        if (isDT() || $tbl().data(INIT_FLAG) === true) return;
         if (!isReady()) {
-            if (retry < 10) setTimeout(() => initDT(retry + 1), 50);
+            if (retry < 12) setTimeout(() => initDT(retry + 1), 60);
             return;
         }
-        $(TABLE_ID).DataTable(buildOptions());
-        markInit(true);
+        sanitizeWrappers(); // ← kunci anti header ganda
+        $(n).DataTable(buildOptions());
+        $tbl().data(INIT_FLAG, true);
     }
 
-    // ===== Lifecycle yang konsisten =====
+    // First paint
+    document.addEventListener("DOMContentLoaded", () =>
+        setTimeout(() => initDT(0), 100)
+    );
 
-    // 1) First paint
-    document.addEventListener("DOMContentLoaded", () => {
-        // jangan destroy di sini — cukup init
-        setTimeout(() => initDT(0), 100);
-    });
-
-    // 2) Livewire v2/v3: setelah patch selesai → INIT SAJA
-    //    (JANGAN destroy di sini, biar tidak balapan dengan morph.added)
-    window.Livewire?.hook?.("message.processed", () => {
-        // gunakan microtask + RAF agar benar-benar setelah DOM settle
-        Promise.resolve().then(() => {
-            requestAnimationFrame(() => initDT(0));
-        });
-    });
-
-    // 3) Livewire v3: sebelum node lama dibuang → DESTROY
+    // Livewire: destroy sebelum patch, init setelah patch
     if (window.Livewire?.hook) {
-        window.Livewire.hook("morph.removing", (el) => {
-            if (el && (el.matches?.(TABLE_ID) || el.querySelector?.(TABLE_ID))) {
-                destroyDT();
-            }
+        window.Livewire.hook("message.sent", () => destroyDT()); // sebelum DOM dipatch
+        window.Livewire.hook("message.processed", () =>
+            Promise.resolve().then(() => requestAnimationFrame(() => initDT(0)))
+        );
+        // safety untuk morph v3
+        window.Livewire.hook("morph.removing", (node) => {
+            const n = el();
+            if (!n) return;
+            if (node === n || node?.querySelector?.(TABLE_ID)) destroyDT();
         });
         window.Livewire.hook("morph.added", () => initDT(0));
         window.Livewire.hook("morph.updated", () => initDT(0));
     }
 
-    // 4) Navigasi Livewire
+    // Navigasi Livewire
     document.addEventListener("livewire:navigated", () => {
         destroyDT();
         setTimeout(() => initDT(0), 120);
     });
 
-    // 5) Observer: bila Livewire hanya ganti TBODY / TH
+    // Observer kalau Livewire hanya ganti thead/tbody
     (function ensureObserver() {
-        const $tbl = $(TABLE_ID);
-        if (!$tbl.length || $tbl.data("dt-observer")) return;
-
-        const t = $tbl[0];
+        const n = el();
+        if (!n || $tbl().data("dt-observer")) return;
         const obs = new MutationObserver((muts) => {
-            // jika wrapper DT copot atau TBODY/HEAD berubah, coba init ulang
-            const need = muts.some(m => m.type === "childList" || m.type === "attributes");
-            if (need) initDT(0);
+            if (
+                muts.some(
+                    (m) => m.type === "childList" || m.type === "attributes"
+                )
+            )
+                initDT(0);
         });
-        obs.observe(t, { childList: true, subtree: true, attributes: true });
-        $tbl.data("dt-observer", obs);
+        obs.observe(n, { childList: true, subtree: true, attributes: true });
+        $tbl().data("dt-observer", obs);
     })();
-
-    // 6) Event manual (opsional)
-    document.addEventListener("gs:before-redraw", () => destroyDT());
-    document.addEventListener("gs:after-redraw", () => setTimeout(() => initDT(0), 80));
 })();
+
 
 
 /* =======================================================
