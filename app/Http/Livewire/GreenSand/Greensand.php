@@ -8,35 +8,26 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
-
-// === Tambahan untuk Export ===
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\GreensandExportFull;
 
 class Greensand extends Component
 {
-    // =================== UI State ===================
     public string $activeTab = 'mm1';
     public string $modalTab = 'mm';
     public string $formMode = 'create';
     public ?int $editingId = null;
 
-    // =================== Controls ===================
-    // NOTE (Opsi B): DataTables yang handle pencarian/paging.
-    // Variabel $search / $searchText tetap dipakai untuk EXPORT.
     public string $search = '';
     public string $searchText = '';
 
-    // =================== Filter =====================
     public ?string $start_date = null;
     public ?string $end_date = null;
     public ?string $filter_shift = null;
     public bool $filterOpen = true;
 
-    // =================== Delete =====================
     public ?int $pendingDeleteId = null;
 
-    // =================== QueryString ================
     protected array $queryString = [
         'activeTab'    => ['except' => 'mm1'],
         'search'       => ['except' => ''],
@@ -45,7 +36,6 @@ class Greensand extends Component
         'filter_shift' => ['except' => null],
     ];
 
-    // =================== Form =======================
     public array $form = [
         'process_date' => null,
         'shift' => '',
@@ -87,12 +77,11 @@ class Greensand extends Component
         'temp_bc11' => null,
     ];
 
-    // =================== Rules ======================
     protected function rules(): array
     {
         return [
             'form.process_date' => ['required', 'date'],
-            'form.shift' => ['required', Rule::in(['Day', 'Night'])],
+            'form.shift' => ['required', Rule::in(['D','S','N'])],
             'form.plant' => ['required', 'integer', 'in:0,1'],
             'form.mm_no' => ['required', 'integer', 'in:1,2'],
             'form.mix_no' => ['required', 'integer', 'min:1'],
@@ -132,7 +121,6 @@ class Greensand extends Component
         ];
     }
 
-    // =================== Modal Helpers ==============
     public function confirmDelete(int $id): void
     {
         $this->pendingDeleteId = $id;
@@ -181,7 +169,7 @@ class Greensand extends Component
         $this->formMode = 'edit';
 
         $this->form = array_merge($this->form, [
-            'process_date' => optional($row->process_date)->format('Y-m-d'),
+            'process_date' => optional($row->process_date)->format('Y-m-d H:i:s'),
             'shift' => $row->shift,
             'plant' => $row->plant,
             'mm_no' => (int) $row->mm_no,
@@ -224,30 +212,29 @@ class Greensand extends Component
         $this->dispatch('gs:open');
     }
 
-    // =================== Delete =====================
     public function delete(int $id): void
     {
         Process::whereKey($id)->delete();
         $this->dispatch('gs:toast', ['type' => 'success', 'text' => 'Data dihapus']);
     }
 
-    // =================== Submit =====================
     public function submit(): void
     {
-        // Lock process_date ke "hari ini (WIB)" saat CREATE (defensif)
         if ($this->formMode === 'create') {
-            $this->form['process_date'] = Carbon::now('Asia/Jakarta')->toDateString();
+    $this->form['process_date'] = Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s');
         }
+
 
         $this->validate();
 
-        $mixStart  = $this->combineDateTime($this->form['process_date'], $this->form['mix_start_t']);
-        $mixFinish = $this->combineDateTime($this->form['process_date'], $this->form['mix_finish_t']);
-        $returnAt  = $this->combineDateTime($this->form['process_date'], $this->form['return_time_t']);
+        $processDateDT = Carbon::parse($this->form['process_date'])->format('Y-m-d H:i:s');
+        $mixStart  = $this->combineDateTime($processDateDT, $this->form['mix_start_t']);
+        $mixFinish = $this->combineDateTime($processDateDT, $this->form['mix_finish_t']);
+        $returnAt  = $this->combineDateTime($processDateDT, $this->form['return_time_t']);
 
         $exists = Process::query()
             ->when($this->formMode === 'edit', fn (Builder $q) => $q->where('id', '!=', $this->editingId))
-            ->where('process_date', $this->form['process_date'])
+            ->whereDate('process_date', Carbon::parse($processDateDT)->toDateString())
             ->where('shift', $this->form['shift'])
             ->where('plant', $this->form['plant'])
             ->where('mm_no', $this->form['mm_no'])
@@ -260,7 +247,7 @@ class Greensand extends Component
         }
 
         $payload = [
-            'process_date' => $this->form['process_date'],
+            'process_date' => $processDateDT,
             'shift'        => $this->form['shift'],
             'plant'        => $this->form['plant'],
             'mm_no'        => $this->form['mm_no'],
@@ -313,7 +300,6 @@ class Greensand extends Component
         $this->resetForm();
     }
 
-    // =================== Filter Actions =============
     public function applySearch(): void
     {
         $this->validate([
@@ -346,24 +332,23 @@ class Greensand extends Component
     public function clearFilters(): void
     {
         $this->start_date = null;
-        $this->end_date = null;
+               $this->end_date = null;
         $this->filter_shift = null;
         $this->dispatch('gs:toast', ['type' => 'info', 'text' => 'Filter cleared']);
     }
 
-public function setActiveTab(string $tab): void
-{
-    if (in_array($tab, ['mm1','mm2','all'], true)) {
-        $this->activeTab = $tab;
+    public function setActiveTab(string $tab): void
+    {
+        if (in_array($tab, ['mm1','mm2','all'], true)) {
+            $this->activeTab = $tab;
+        }
     }
-}
 
     public function updatedSearch(): void
     {
         $this->search = trim($this->search);
     }
 
-    // =================== Builders ===================
     protected function baseQuery(): Builder
     {
         $q = Process::query();
@@ -391,11 +376,15 @@ public function setActiveTab(string $tab): void
         });
     }
 
-    // =================== Helpers ====================
-    private function combineDateTime(?string $date, ?string $time): ?string
+    private function combineDateTime(?string $dateOrDatetime, ?string $time): ?string
     {
-        if (!$date || !$time) return null;
-        return $date . ' ' . $time . ':00';
+        if (!$dateOrDatetime || !$time) return null;
+        $d = Carbon::parse($dateOrDatetime);
+        if (strlen($time) === 5) {
+            $time .= ':00';
+        }
+        $d->setTimeFromTimeString($time);
+        return $d->format('Y-m-d H:i:s');
     }
 
     private function resetForm(): void
@@ -403,7 +392,7 @@ public function setActiveTab(string $tab): void
         $this->editingId = null;
         $this->formMode = 'create';
         $this->form = array_merge($this->form, [
-            'process_date' =>  Carbon::now('Asia/Jakarta')->toDateString(),
+            'process_date' => Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s'),
             'shift' => '',
             'plant' => 0,
             'mm_no' => 1,
@@ -451,10 +440,8 @@ public function setActiveTab(string $tab): void
         }
     }
 
-    // =================== EXPORT (Tambahan) ==========
-public function export(string $scope = 'all')
+    public function export(string $scope = 'all')
     {
-        // Ubah scope -> mm_no
         $mm = $scope === 'mm1' ? 1 : ($scope === 'mm2' ? 2 : null);
 
         $filename = sprintf(
@@ -475,7 +462,6 @@ public function export(string $scope = 'all')
         );
     }
 
-    // =================== Render =====================
     public function render()
     {
         $this->normalizeDateRange();

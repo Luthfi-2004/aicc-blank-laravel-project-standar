@@ -12,8 +12,8 @@ return new class extends Migration {
             $t->bigIncrements('id');
 
             //HEADER
-            $t->date('process_date');                        // tanggal cek
-            $t->enum('shift', ['Day','Night']);             // shift
+            $t->dateTime('process_date');                        // tanggal cek
+            $t->enum('shift', ['D','S','N']);             // shift
             $t->unsignedTinyInteger('plant')->default(0);   // 0 = SJH, 1 = ACE LINE
             $t->unsignedSmallInteger('mm_no');              // 1 = MM1, 2 = MM2
             $t->unsignedInteger('mix_no');                  // Mix Ke
