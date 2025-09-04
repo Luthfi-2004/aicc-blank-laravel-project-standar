@@ -129,34 +129,32 @@
                             <td class="text-center">{{ $row->temp_bc11 }}</td>
                         </tr>
                     @empty
-                        <tr>
-                            <td class="text-center" colspan="38">No data available.</td>
-                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog"
-         aria-labelledby="confirmDeleteTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content border-0">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="confirmDeleteTitle">Konfirmasi Hapus</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p id="confirmDeleteText" class="mb-0">Yakin ingin menghapus data ini?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteYes">Ya, Hapus</button>
-                </div>
-            </div>
-        </div>
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog"
+     aria-labelledby="confirmDeleteTitle" aria-hidden="true" wire:ignore.self>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content border-0">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="confirmDeleteTitle">Confirm Delete</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmDeleteText" class="mb-0">Are you sure you want to delete this data?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteYes">Yes, Delete</button>
+      </div>
     </div>
+  </div>
+</div>
+
 
 </div>

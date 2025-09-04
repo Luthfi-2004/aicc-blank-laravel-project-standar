@@ -300,9 +300,9 @@ window.addEventListener("gs:export", (e) => {
         const label = btn.getAttribute("data-label") || `ID ${pendingId}`;
         const $title = document.querySelector(MODAL_TITLE);
         const $text = document.querySelector(MODAL_TEXT);
-        if ($title) $title.textContent = "Konfirmasi Hapus";
+        if ($title) $title.textContent = "Confirm Delete";
         if ($text)
-            $text.textContent = `Yakin ingin menghapus data ${label}? Tindakan ini tidak dapat dibatalkan.`;
+            $text.textContent = `Are you sure want to delete the data ${label}?`;
         $(MODAL_ID).modal("show");
     });
 
@@ -328,3 +328,103 @@ window.addEventListener("gs:export", (e) => {
         document.body.focus();
     });
 })();
+ (function () {
+     const $ = window.jQuery;
+
+     toastr.options = {
+         closeButton: true,
+         progressBar: true,
+         newestOnTop: true,
+         preventDuplicates: true,
+         positionClass: "toast-top-right",
+         timeOut: 3000,
+         extendedTimeOut: 1500,
+         showDuration: 200,
+         hideDuration: 200,
+         showMethod: "fadeIn",
+         hideMethod: "fadeOut",
+         // kalau kamu curiga masalah HTML escaping, bisa set false sementara:
+         // escapeHtml: false,
+     };
+
+     window.addEventListener("gs:toast", (e) => {
+         const d = e.detail || {};
+         const type = String(d.type || "success").toLowerCase();
+         const title = (d.title ?? "").toString().trim();
+         const msgRaw = (d.text ?? d.message ?? "").toString();
+         const msg = msgRaw.trim();
+         const message =
+             msg ||
+             (type === "success"
+                 ? "Succes"
+                 : type === "error"
+                 ? "Terjadi kesalahan"
+                 : type === "warning"
+                 ? "Perhatian"
+                 : "Info");
+
+         switch (type) {
+             case "success":
+                 toastr.success(message, title);
+                 break;
+             case "error":
+                 toastr.error(message, title);
+                 break;
+             case "warning":
+                 toastr.warning(message, title);
+                 break;
+             default:
+                 toastr.info(message, title);
+                 break;
+         }
+     });
+
+     function cleanupBackdrops() {
+         try {
+             document
+                 .querySelectorAll(".modal-backdrop")
+                 .forEach((b) => b.remove());
+             if (!$(".modal.show").length) {
+                 document.body.classList.remove("modal-open");
+                 document.body.style.removeProperty("padding-right");
+             }
+         } catch (_) {}
+     }
+
+     window.addEventListener("gs:confirm-open", () => {
+         $("#confirmDeleteModal").modal("show");
+     });
+     window.addEventListener("gs:confirm-close", () => {
+         $("#confirmDeleteModal").modal("hide");
+         setTimeout(cleanupBackdrops, 50);
+     });
+
+     // Modal form utama (kalau ada)
+     window.addEventListener("gs:open", () =>
+         $("#modal-greensand").modal("show")
+     );
+     window.addEventListener("gs:close", () => {
+         $("#modal-greensand").modal("hide");
+         setTimeout(cleanupBackdrops, 50);
+     });
+
+     $(document).on("hidden.bs.modal", cleanupBackdrops);
+
+     
+     $(document)
+         .off("click.gs-confirm")
+         .on("click.gs-confirm", "#confirmDeleteYes", function () {
+             try {
+                 const compRoot = this.closest("[wire\\:id]"); // root komponen terdekat
+                 if (!compRoot) return;
+                 const id = compRoot.getAttribute("wire:id");
+                 if (id && window.Livewire && Livewire.find) {
+                     Livewire.find(id).call("deleteConfirmed");
+                 }
+             } catch (_) {}
+         });
+
+     // Jaga-jaga saat Livewire update
+     document.addEventListener("livewire:update", cleanupBackdrops);
+     document.addEventListener("livewire:navigated", cleanupBackdrops);
+ })();
