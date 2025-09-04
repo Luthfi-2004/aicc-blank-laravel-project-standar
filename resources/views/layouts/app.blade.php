@@ -33,7 +33,6 @@
 
     {{-- Scripts --}}
     @include('components.scripts')
-    <script src="{{ asset('js/greensand.js') }}"></script>
     {{-- Stack --}}
     @stack('scripts')
 </body>

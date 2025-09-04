@@ -215,8 +215,13 @@ class Greensand extends Component
 
     public function delete(int $id): void
     {
-        Process::whereKey($id)->delete();
-        $this->dispatch('gs:toast', ['type' => 'success', 'text' => 'Data dihapus']);
+        try {
+            Process::whereKey($id)->delete();
+            $this->toast('success', 'Data berhasil dihapus', 'Berhasil');
+        } catch (\Throwable $e) {
+            report($e);
+            $this->toast('error', 'Terjadi kesalahan saat menghapus data', 'Gagal');
+        }
     }
 
     public function submit(): void
@@ -224,7 +229,6 @@ class Greensand extends Component
         if ($this->formMode === 'create') {
             $this->form['process_date'] = Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s');
         }
-
 
         $this->validate();
 
@@ -244,6 +248,7 @@ class Greensand extends Component
 
         if ($exists) {
             $this->addError('form.mix_no', 'Data mix sudah ada.');
+            $this->toast('warning', 'Data mix dengan kombinasi tersebut sudah ada', 'Duplikat');
             return;
         }
 
@@ -288,17 +293,28 @@ class Greensand extends Component
             'temp_bc11'     => $this->form['temp_bc11'],
         ];
 
-        DB::transaction(function () use ($payload) {
-            if ($this->formMode === 'edit' && $this->editingId) {
-                Process::whereKey($this->editingId)->update($payload);
-            } else {
-                Process::create($payload);
-            }
-        });
+        try {
+            DB::transaction(function () use ($payload) {
+                if ($this->formMode === 'edit' && $this->editingId) {
+                    Process::whereKey($this->editingId)->update($payload);
+                } else {
+                    Process::create($payload);
+                }
+            });
 
-        $this->dispatch('gs:close');
-        $this->dispatch('gs:toast', ['type' => 'success', 'text' => 'Data berhasil disimpan']);
-        $this->resetForm();
+            $this->dispatch('gs:close');
+
+            $msg = ($this->formMode === 'edit')
+                ? 'Data berhasil diperbarui'
+                : 'Data berhasil ditambahkan';
+
+            $this->toast('success', $msg, 'Berhasil');
+            $this->resetForm();
+
+        } catch (\Throwable $e) {
+            report($e);
+            $this->toast('error', 'Terjadi kesalahan saat menyimpan data', 'Gagal');
+        }
     }
 
     public function applySearch(): void
@@ -335,7 +351,7 @@ class Greensand extends Component
         $this->start_date = null;
         $this->end_date = null;
         $this->filter_shift = null;
-        $this->dispatch('gs:toast', ['type' => 'info', 'text' => 'Filter cleared']);
+        $this->toast('info', 'Filter dibersihkan', 'Info');
     }
 
     public function setActiveTab(string $tab): void
@@ -495,6 +511,19 @@ class Greensand extends Component
 
         return view('livewire.greensand.green-sand', [
             'currentRows' => $rowsAll,
+        ]);
+    }
+
+    /**
+     * Helper Toast (tambahan)
+     * - Menyeragamkan event browser untuk Toastr
+     */
+    private function toast(string $type, string $text, string $title = ''): void
+    {
+        $this->dispatch('gs:toast', [
+            'type' => $type,   
+            'text' => $text,
+            'title' => $title,
         ]);
     }
 }

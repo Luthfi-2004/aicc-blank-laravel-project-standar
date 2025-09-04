@@ -16,14 +16,12 @@
 <link rel="stylesheet" href="{{ asset('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/libs/select2/css/select2.min.css') }}">
-{{-- Opsional: aktifkan hanya jika dipakai di halaman --}}
-{{-- <link rel="stylesheet" href="{{ asset('assets/libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css') }}"> --}}
-{{-- <link rel="stylesheet" href="{{ asset('assets/libs/sweetalert2/sweetalert2.min.css') }}"> --}}
-{{-- <link rel="stylesheet" href="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css') }}"> --}}
+<link rel="stylesheet" href="{{ asset('assets/libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/libs/sweetalert2/sweetalert2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/libs/admin-resources/jquery.vectormap/jquery-jvectormap-1.2.2.css') }}">
 
 <!-- Font & Favicon -->
 <link rel="stylesheet" href="{{ asset('assets/css/gfont-nunito.css') }}">
 <link rel="icon" type="image/png" href="{{ asset('assets/images/favicon.png') }}">
-
 <link rel="stylesheet" href="{{ asset('assets/libs/toastr/build/toastr.min.css') }}">
 @livewireStyles

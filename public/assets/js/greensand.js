@@ -1,15 +1,11 @@
 // resources/js/greensand.js
 
-/* =======================================================
-   Livewire bootstrap: sync date & filter collapse control
-======================================================= */
+// Livewire init: sync start/end date, control filter collapse (with jQuery), and modal open/close
 document.addEventListener("livewire:init", () => {
-    /* ========== DATE SYNC (Start/End) ========== */
     function syncDates() {
         const s = document.getElementById("startDate");
         const e = document.getElementById("endDate");
         if (!s || !e) return;
-
         e.min = s.value || "";
         if (s.value && (!e.value || e.value < s.value)) {
             e.value = s.value;
@@ -26,7 +22,6 @@ document.addEventListener("livewire:init", () => {
         if (ev.target?.id === "startDate") syncDates();
     });
 
-    /* ========== FILTER COLLAPSE (BS4 + jQuery) ========== */
     const $ = window.jQuery;
     if (!$) return;
 
@@ -35,9 +30,7 @@ document.addEventListener("livewire:init", () => {
     const $header = $("#filterHeader");
 
     if ($col.length) {
-        // inisialisasi tanpa auto-toggle
         $col.collapse({ toggle: false });
-
         let reconcileTimer = null;
 
         function setIcon(isOpen) {
@@ -46,14 +39,11 @@ document.addEventListener("livewire:init", () => {
                 .removeClass("ri-add-line ri-subtract-line")
                 .addClass(isOpen ? "ri-subtract-line" : "ri-add-line");
         }
-
         function getLW() {
             const root = $col.closest("[wire\\:id]");
             if (!root.length || !window.Livewire) return null;
             return window.Livewire.find(root.attr("wire:id"));
         }
-
-        // guard klik ketika sedang lock
         $header.on("click", (e) => {
             if ($col.attr("data-lock") === "1") {
                 e.preventDefault();
@@ -61,29 +51,22 @@ document.addEventListener("livewire:init", () => {
                 return false;
             }
         });
-
         function lock(on) {
             $col.attr("data-lock", on ? "1" : "0");
             $header.toggleClass("locked", !!on);
         }
-
         function reconcileCollapse() {
             if ($col.attr("data-lock") === "1") return;
-
             const shouldOpen = $col.attr("data-open") === "1";
             const lastState = $col.attr("data-gs-state") === "1";
             const isShown = $col.hasClass("show");
-
             if (!$col.data("gs-boot")) {
                 setIcon(isShown);
                 $col.attr("data-gs-state", isShown ? "1" : "0");
                 $col.data("gs-boot", 1);
                 return;
             }
-
             if (shouldOpen !== lastState) {
-                // force reflow
-                // eslint-disable-next-line no-unused-expressions
                 $col[0].offsetHeight;
                 lock(true);
                 $col.collapse(shouldOpen ? "show" : "hide");
@@ -91,7 +74,6 @@ document.addEventListener("livewire:init", () => {
                 setIcon(isShown);
             }
         }
-
         function scheduleReconcile() {
             if (reconcileTimer) clearTimeout(reconcileTimer);
             reconcileTimer = setTimeout(() => {
@@ -99,11 +81,9 @@ document.addEventListener("livewire:init", () => {
                 reconcileCollapse();
             }, 80);
         }
-
         if (!$col.data("gs-bound")) {
             $col.on("show.bs.collapse", () => lock(true));
             $col.on("hide.bs.collapse", () => lock(true));
-
             $col.on("shown.bs.collapse", () => {
                 setIcon(true);
                 $col.attr("data-gs-state", "1");
@@ -111,7 +91,6 @@ document.addEventListener("livewire:init", () => {
                 const lw = getLW();
                 if (lw?.get("filterOpen") !== true) lw.set("filterOpen", true);
             });
-
             $col.on("hidden.bs.collapse", () => {
                 setIcon(false);
                 $col.attr("data-gs-state", "0");
@@ -120,16 +99,13 @@ document.addEventListener("livewire:init", () => {
                 if (lw?.get("filterOpen") !== false)
                     lw.set("filterOpen", false);
             });
-
             $col.data("gs-bound", 1);
         }
-
         document.addEventListener("DOMContentLoaded", scheduleReconcile);
         document.addEventListener("livewire:navigated", scheduleReconcile);
         window.Livewire?.hook?.("message.processed", scheduleReconcile);
     }
 
-    /* ========== MODAL OPEN/CLOSE (generic) ========== */
     window.addEventListener("gs:open", () => {
         $("#modal-greensand").modal("show");
     });
@@ -138,22 +114,20 @@ document.addEventListener("livewire:init", () => {
     });
 });
 
-/* =======================================================
-   Export trigger (download link diarahkan)
-======================================================= */
+// Export trigger: navigate to provided download URL
 window.addEventListener("gs:export", (e) => {
     const d = e.detail;
     const url = (d && (d.url || (Array.isArray(d) && d[0]?.url))) || null;
     if (url) window.location.href = url;
 });
 
+// DataTables client-side: init/destroy with state per tab and Livewire/morph hooks
 (function attachDataTablesClientSide() {
     const $ = window.jQuery;
     if (!$ || !$.fn || !$.fn.DataTable) return;
 
     const TABLE_ID = "#datatable1";
     const INIT_FLAG = "__gs_dt_inited";
-
     const $tbl = () => $(TABLE_ID);
     const el = () => document.querySelector(TABLE_ID);
 
@@ -170,14 +144,13 @@ window.addEventListener("gs:export", (e) => {
     function sanitizeWrappers() {
         const n = el();
         if (!n) return;
-        // buang wrapper yatim (yang tidak lagi berisi table target)
         document.querySelectorAll(".dataTables_wrapper").forEach((w) => {
-            if (!w.contains(n))
+            if (!w.contains(n)) {
                 try {
                     w.remove();
                 } catch {}
+            }
         });
-        // kalau table masih ke-wrap tapi belum DT aktif, pastikan bersih
         if (!isDT() && $(n).closest(".dataTables_wrapper").length) {
             try {
                 $(n).DataTable().destroy(true);
@@ -198,7 +171,7 @@ window.addEventListener("gs:export", (e) => {
 
     function isReady() {
         const n = el();
-        return !!(n && n.tHead && n.tBodies && n.tBodies[0]); // tbody boleh kosong
+        return !!(n && n.tHead && n.tBodies && n.tBodies[0]);
     }
 
     function buildOptions() {
@@ -242,8 +215,7 @@ window.addEventListener("gs:export", (e) => {
         };
         if ($.fn.dataTable && $.fn.dataTable.Buttons) {
             opts.dom =
-                "<'row'<'col-sm-6'B><'col-sm-6'f>>" +
-                "tr<'row'<'col-sm-5'i><'col-sm-7'p>>";
+                "<'row'<'col-sm-6'B><'col-sm-6'f>>tr<'row'<'col-sm-5'i><'col-sm-7'p>>";
             opts.buttons = [
                 { extend: "copyHtml5", titleAttr: "Copy" },
                 { extend: "csvHtml5", titleAttr: "CSV" },
@@ -252,8 +224,7 @@ window.addEventListener("gs:export", (e) => {
             ];
         } else {
             opts.dom =
-                "<'row'<'col-sm-6'l><'col-sm-6'f>>" +
-                "tr<'row'<'col-sm-5'i><'col-sm-7'p>>";
+                "<'row'<'col-sm-6'l><'col-sm-6'f>>tr<'row'<'col-sm-5'i><'col-sm-7'p>>";
         }
         return opts;
     }
@@ -266,23 +237,20 @@ window.addEventListener("gs:export", (e) => {
             if (retry < 12) setTimeout(() => initDT(retry + 1), 60);
             return;
         }
-        sanitizeWrappers(); // ← kunci anti header ganda
+        sanitizeWrappers();
         $(n).DataTable(buildOptions());
         $tbl().data(INIT_FLAG, true);
     }
 
-    // First paint
     document.addEventListener("DOMContentLoaded", () =>
         setTimeout(() => initDT(0), 100)
     );
 
-    // Livewire: destroy sebelum patch, init setelah patch
     if (window.Livewire?.hook) {
-        window.Livewire.hook("message.sent", () => destroyDT()); // sebelum DOM dipatch
+        window.Livewire.hook("message.sent", () => destroyDT());
         window.Livewire.hook("message.processed", () =>
             Promise.resolve().then(() => requestAnimationFrame(() => initDT(0)))
         );
-        // safety untuk morph v3
         window.Livewire.hook("morph.removing", (node) => {
             const n = el();
             if (!n) return;
@@ -292,13 +260,11 @@ window.addEventListener("gs:export", (e) => {
         window.Livewire.hook("morph.updated", () => initDT(0));
     }
 
-    // Navigasi Livewire
     document.addEventListener("livewire:navigated", () => {
         destroyDT();
         setTimeout(() => initDT(0), 120);
     });
 
-    // Observer kalau Livewire hanya ganti thead/tbody
     (function ensureObserver() {
         const n = el();
         if (!n || $tbl().data("dt-observer")) return;
@@ -315,13 +281,7 @@ window.addEventListener("gs:export", (e) => {
     })();
 })();
 
-
-
-/* =======================================================
-   DELETE FLOW (tanpa alert Edge)
-   - Klik tombol .js-delete => buka modal konfirmasi
-   - Klik YA => panggil Livewire method `delete(id)`
-======================================================= */
+// Delete flow: confirm via modal and call Livewire delete(id)
 (function handleDeleteFlow() {
     const $ = window.jQuery;
     if (!$) return;
@@ -330,68 +290,141 @@ window.addEventListener("gs:export", (e) => {
     const BTN_YES = "#confirmDeleteYes";
     const MODAL_TITLE = "#confirmDeleteTitle";
     const MODAL_TEXT = "#confirmDeleteText";
-
     let pendingId = null;
 
-    // Delegasi klik tombol delete
     document.addEventListener("click", (ev) => {
         const btn = ev.target.closest(".js-delete");
         if (!btn) return;
         ev.preventDefault();
-
         pendingId = btn.getAttribute("data-id");
         const label = btn.getAttribute("data-label") || `ID ${pendingId}`;
-
-        // set konten modal
         const $title = document.querySelector(MODAL_TITLE);
         const $text = document.querySelector(MODAL_TEXT);
-        if ($title) $title.textContent = "Konfirmasi Hapus";
+        if ($title) $title.textContent = "Confirm Delete";
         if ($text)
-            $text.textContent = `Yakin ingin menghapus data ${label}? Tindakan ini tidak dapat dibatalkan.`;
-
+            $text.textContent = `Are you sure want to delete the data ${label}?`;
         $(MODAL_ID).modal("show");
     });
 
-    // Klik tombol YA pada modal
     document.addEventListener("click", (ev) => {
         const yes = ev.target.closest(BTN_YES);
-        if (!yes) return;
+        if (!yes || !pendingId) return;
 
-        if (!pendingId) return;
-
-        // Temukan komponen Livewire terdekat dari tabel
         const table = document.querySelector("#datatable1");
         let lw = null;
         if (table) {
             const root = table.closest("[wire\\:id]");
-            if (root && window.Livewire) {
+            if (root && window.Livewire)
                 lw = window.Livewire.find(root.getAttribute("wire:id"));
-            }
         }
-
-        // Panggil method delete di server
-        if (lw?.call) {
-            lw.call("delete", parseInt(pendingId, 10));
-        }
-
-        // reset pending id
+        if (lw?.call) lw.call("delete", parseInt(pendingId, 10));
         pendingId = null;
-
-        // lepas fokus dari tombol sebelum modal ditutup
-        if (document.activeElement) {
-            document.activeElement.blur();
-        }
-
-        // tutup modal via bootstrap API
+        if (document.activeElement) document.activeElement.blur();
         $(MODAL_ID).modal("hide");
     });
 
-    // Jika modal ditutup, reset pending id
     $(MODAL_ID).on("hidden.bs.modal", () => {
         pendingId = null;
-        // pastikan fokus kembali ke body
         document.body.focus();
     });
 })();
+ (function () {
+     const $ = window.jQuery;
 
-// select2
+     toastr.options = {
+         closeButton: true,
+         progressBar: true,
+         newestOnTop: true,
+         preventDuplicates: true,
+         positionClass: "toast-top-right",
+         timeOut: 3000,
+         extendedTimeOut: 1500,
+         showDuration: 200,
+         hideDuration: 200,
+         showMethod: "fadeIn",
+         hideMethod: "fadeOut",
+         // kalau kamu curiga masalah HTML escaping, bisa set false sementara:
+         // escapeHtml: false,
+     };
+
+     window.addEventListener("gs:toast", (e) => {
+         const d = e.detail || {};
+         const type = String(d.type || "success").toLowerCase();
+         const title = (d.title ?? "").toString().trim();
+         const msgRaw = (d.text ?? d.message ?? "").toString();
+         const msg = msgRaw.trim();
+         const message =
+             msg ||
+             (type === "success"
+                 ? "Succes"
+                 : type === "error"
+                 ? "Terjadi kesalahan"
+                 : type === "warning"
+                 ? "Perhatian"
+                 : "Info");
+
+         switch (type) {
+             case "success":
+                 toastr.success(message, title);
+                 break;
+             case "error":
+                 toastr.error(message, title);
+                 break;
+             case "warning":
+                 toastr.warning(message, title);
+                 break;
+             default:
+                 toastr.info(message, title);
+                 break;
+         }
+     });
+
+     function cleanupBackdrops() {
+         try {
+             document
+                 .querySelectorAll(".modal-backdrop")
+                 .forEach((b) => b.remove());
+             if (!$(".modal.show").length) {
+                 document.body.classList.remove("modal-open");
+                 document.body.style.removeProperty("padding-right");
+             }
+         } catch (_) {}
+     }
+
+     window.addEventListener("gs:confirm-open", () => {
+         $("#confirmDeleteModal").modal("show");
+     });
+     window.addEventListener("gs:confirm-close", () => {
+         $("#confirmDeleteModal").modal("hide");
+         setTimeout(cleanupBackdrops, 50);
+     });
+
+     // Modal form utama (kalau ada)
+     window.addEventListener("gs:open", () =>
+         $("#modal-greensand").modal("show")
+     );
+     window.addEventListener("gs:close", () => {
+         $("#modal-greensand").modal("hide");
+         setTimeout(cleanupBackdrops, 50);
+     });
+
+     $(document).on("hidden.bs.modal", cleanupBackdrops);
+
+     
+     $(document)
+         .off("click.gs-confirm")
+         .on("click.gs-confirm", "#confirmDeleteYes", function () {
+             try {
+                 const compRoot = this.closest("[wire\\:id]"); // root komponen terdekat
+                 if (!compRoot) return;
+                 const id = compRoot.getAttribute("wire:id");
+                 if (id && window.Livewire && Livewire.find) {
+                     Livewire.find(id).call("deleteConfirmed");
+                 }
+             } catch (_) {}
+         });
+
+     // Jaga-jaga saat Livewire update
+     document.addEventListener("livewire:update", cleanupBackdrops);
+     document.addEventListener("livewire:navigated", cleanupBackdrops);
+ })();
