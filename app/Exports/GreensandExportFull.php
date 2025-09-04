@@ -13,6 +13,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use App\Support\GreensandQuery; // <— TAMBAH INI
 
 class GreensandExportFull implements FromQuery, WithHeadings, WithMapping, WithStyles, WithColumnWidths
 {
@@ -26,47 +27,38 @@ class GreensandExportFull implements FromQuery, WithHeadings, WithMapping, WithS
 
     public function query()
     {
-        $q = Process::query();
+        // gunakan builder yang sama agar hasil export = hasil yang tampil di UI
+        $filters = [
+            'start' => $this->start,
+            'end'   => $this->end,
+            'shift' => $this->shift,
+            'q'     => $this->q,
+            'mm'    => $this->mm,
+        ];
 
-        if ($this->mm)    $q->where('mm_no', $this->mm);
-        if ($this->start) $q->whereDate('process_date', '>=', $this->start);
-        if ($this->end)   $q->whereDate('process_date', '<=', $this->end);
-        if ($this->shift) $q->where('shift', $this->shift);
-        if ($this->q) {
-            $kw = '%'.trim($this->q).'%';
-            $q->where(function (Builder $w) use ($kw) {
-                $w->where('mix_no', 'like', $kw)
-                  ->orWhere('model_type', 'like', $kw);
-            });
-        }
+        $q = GreensandQuery::build($filters);
 
-        return $q->orderByDesc('process_date')->orderByDesc('mix_no');
+        // (opsional) debug:
+        // logger()->info('[EXPORT greensand] count', ['count' => (clone $q)->count(), 'filters' => $filters]);
+
+        return $q;
     }
 
     public function headings(): array
     {
-        // Baris 1: teks grup di sel paling kiri area merge (agar terlihat).
         return [
             [
                 'Process Date','Shift','MM No','Mix No','Mix Start','Mix Finish',
-                'MM Sample', // G1 → merge G1:T1
-                '', '', '', '', '', '', '', '', '', '', '', '', '',
-                'Additive',  // U1 → merge U1:W1
-                '', '',
-                'BC Sample', // X1 → merge X1:AC1
-                '', '', '', '', '',
-                'Return Sand', // AD1 → merge AD1:AK1
-                '', '', '', '', '', '', '',
+                'MM Sample', '', '', '', '', '', '', '', '', '', '', '', '', '',
+                'Additive',  '', '',
+                'BC Sample', '', '', '', '', '',
+                'Return Sand', '', '', '', '', '', '', '',
             ],
             [
                 '','','','','','',
-                // MM Sample (G..T)
                 'P','C','GT','CB (MM)','CB (Lab)','M','Bakunetsu','AC','TC','VSD (MM)','IG','CB Weight','TP50 Weight','SSI',
-                // Additive (U..W)
                 'M3','VSD','SC',
-                // BC Sample (X..AC)
                 'BC12 CB','BC12 M','BC11 AC','BC11 VSD','BC16 CB','BC16 M',
-                // Return Sand (AD..AK)
                 'RS Time','Type','Moist BC9','Moist BC10','Moist BC11','Temp BC9','Temp BC10','Temp BC11',
             ],
         ];
@@ -75,10 +67,10 @@ class GreensandExportFull implements FromQuery, WithHeadings, WithMapping, WithS
     public function map($row): array
     {
         $fmtDate = fn($v) => $v
-            ? ($v instanceof \DateTimeInterface ? $v->format('Y-m-d') : Carbon::parse($v)->format('Y-m-d'))
+            ? ($v instanceof \DateTimeInterface ? $v->format('Y-m-d') : \Carbon\Carbon::parse($v)->format('Y-m-d'))
             : '';
         $fmtTime = fn($v) => $v
-            ? ($v instanceof \DateTimeInterface ? $v->format('H:i') : Carbon::parse($v)->format('H:i'))
+            ? ($v instanceof \DateTimeInterface ? $v->format('H:i') : \Carbon\Carbon::parse($v)->format('H:i'))
             : '';
         $val = fn($v) => $v ?? '';
 
@@ -135,10 +127,10 @@ class GreensandExportFull implements FromQuery, WithHeadings, WithMapping, WithS
         $sheet->mergeCells('D1:D2');
         $sheet->mergeCells('E1:E2');
         $sheet->mergeCells('F1:F2');
-        $sheet->mergeCells('G1:T1');  
-        $sheet->mergeCells('U1:W1');   
-        $sheet->mergeCells('X1:AC1'); 
-        $sheet->mergeCells('AD1:AK1'); 
+        $sheet->mergeCells('G1:T1');
+        $sheet->mergeCells('U1:W1');
+        $sheet->mergeCells('X1:AC1');
+        $sheet->mergeCells('AD1:AK1');
 
         $lastCol    = 'AK';
         $highestRow = $sheet->getHighestRow();
@@ -150,15 +142,8 @@ class GreensandExportFull implements FromQuery, WithHeadings, WithMapping, WithS
                 'vertical'   => Alignment::VERTICAL_CENTER,
                 'wrapText'   => true,
             ],
-            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '4F81BD']],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000'],
-                ],
-            ],
-        ]);
-
+            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '4F81BD']]],
+        );
 
         $sheet->getRowDimension(1)->setRowHeight(22);
         $sheet->getRowDimension(2)->setRowHeight(22);
