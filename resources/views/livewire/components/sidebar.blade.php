@@ -8,8 +8,7 @@
 
                 {{-- Dashboard --}}
                 <li>
-                    <a href="{{ route('dashboard') }}" 
-                       class="waves-effect {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('dashboard') }}" class="waves-effect {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         <i class="ri-dashboard-line"></i>
                         <span>Dashboard</span>
                     </a>
@@ -17,10 +16,17 @@
 
                 {{-- Green Sand Check --}}
                 <li>
-                    <a href="{{ route('greensand.index') }}" 
-                       class="waves-effect {{ request()->routeIs('greensand.index') ? 'active' : '' }}">
+                    <a href="{{ route('greensand.index') }}" class="waves-effect {{ request()->routeIs('greensand.index') ? 'active' : '' }}">
                         <i class="ri-flask-line"></i>
                         <span>Green Sand Check</span>
+                    </a>
+                </li>
+
+                {{-- JSH GFN --}}
+                <li>
+                    <a href="{{ route('jsh-green-sand.index') }}" class="waves-effect {{ request()->routeIs('jsh-green-sand.index') ? 'active' : '' }}">
+                        <i class="ri-settings-line"></i>
+                        <span>JSH GFN</span>
                     </a>
                 </li>
             </ul>
