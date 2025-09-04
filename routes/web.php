@@ -19,13 +19,6 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', LoginPage::class)->name('login');
 });
 
-<<<<<<< HEAD
-Route::get('/', Dashboard::class)->name('dashboard');
-Route::get('/login', Login::class)->name('login');
-Route::get('/greensand', Greensand::class)->name('greensand.index');
-Route::get('/greensand/export', [GreensandExportController::class, 'download'])->name('greensand.export');
-Route::get('/jsh-green-sand', JshGreenSand::class)->name('jsh-green-sand.index');
-=======
 /*
 |--------------------------------------------------------------------------
 | Authenticated routes (harus login)
@@ -36,9 +29,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
 
     // Green Sand
-    Route::get('/greensand', Greensand::class)->name('greensand.index');
-    Route::get('/greensand/export', [GreensandExportController::class, 'download'])->name('greensand.export');
+    Route::prefix('greensand')->group(function () {
+        Route::get('/', Greensand::class)->name('greensand.index');
+        Route::get('/export', [GreensandExportController::class, 'download'])->name('greensand.export');
+    });
+
+    // JSH Green Sand
+    Route::get('/jsh-green-sand', JshGreenSand::class)->name('jsh-green-sand.index');
+
+    // Change Password
     Route::get('/change-password', ChangePassword::class)->name('password.change');
+
     // Logout (POST agar aman, gunakan form dengan @csrf)
     Route::post('/logout', function () {
         Auth::logout();
@@ -47,4 +48,3 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('login');
     })->name('logout');
 });
->>>>>>> ec161f383fefd325abdcd6ac55e7e374c6adbafc
