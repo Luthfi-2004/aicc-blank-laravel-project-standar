@@ -185,7 +185,7 @@ window.addEventListener("gs:export", (e) => {
             autoWidth: false,
             responsive: false,
             scrollX: true,
-            lengthMenu: [10, 25, 50, 100],
+            lengthMenu: [10, 25, 50, 100, 500, 1000],
             pageLength: 10,
             stateSave: true,
             stateDuration: -1,

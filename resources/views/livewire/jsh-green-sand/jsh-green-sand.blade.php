@@ -46,11 +46,11 @@
                                     <td>{{ number_format($row->percentage_index ?? 0, 1, ',', '.') }}</td>
                                 </tr>
                                 @empty
-                                <tr>
+                                <!-- <tr>
                                     <td colspan="6" class="text-center text-muted">
                                         Belum ada data dalam 24 jam terakhir.
                                     </td>
-                                </tr>
+                                </tr> -->
                                 @endforelse
 
                                 @if(!empty($displayRecap))

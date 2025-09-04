@@ -27,7 +27,7 @@
                                 <select class="form-control @error('form.shift') is-invalid @enderror" wire:model.defer="form.shift" autocomplete="off">
                                     <option value="" disabled {{ $form['shift'] === '' ? 'selected' : '' }}>-- Select Shift --</option>
                                     <option value="D">Day</option>
-                                    <option value="S">Subuh</option>
+                                    <option value="S">Swing</option>
                                     <option value="N">Night</option>
                                 </select>
                                 @error('form.shift') <div class="invalid-feedback">{{ $message }}</div> @enderror
