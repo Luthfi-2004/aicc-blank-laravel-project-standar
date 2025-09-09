@@ -10,37 +10,28 @@ use App\Http\Livewire\JshGreenSand\JshGreenSand;
 use App\Http\Controllers\GreensandExportController;
 use App\Http\Livewire\Auth\ChangePassword;
 
-/*
-|--------------------------------------------------------------------------
-| Guest routes (hanya bisa diakses ketika BELUM login)
-|--------------------------------------------------------------------------
-*/
+// Guest
 Route::middleware('guest')->group(function () {
     Route::get('/login', LoginPage::class)->name('login');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Authenticated routes (harus login)
-|--------------------------------------------------------------------------
-*/
+// Auth
 Route::middleware('auth')->group(function () {
-    // Dashboard sebagai halaman utama setelah login
     Route::get('/', Dashboard::class)->name('dashboard');
 
-    // Green Sand
+    // Greensand
     Route::prefix('greensand')->group(function () {
         Route::get('/', Greensand::class)->name('greensand.index');
         Route::get('/export', [GreensandExportController::class, 'download'])->name('greensand.export');
     });
 
-    // JSH Green Sand
+    // JSH Greensand
     Route::get('/jsh-green-sand', JshGreenSand::class)->name('jsh-green-sand.index');
 
     // Change Password
     Route::get('/change-password', ChangePassword::class)->name('password.change');
 
-    // Logout (POST agar aman, gunakan form dengan @csrf)
+    // Logout
     Route::post('/logout', function () {
         Auth::logout();
         request()->session()->invalidate();
