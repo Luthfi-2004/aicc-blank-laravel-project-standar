@@ -25,4 +25,4 @@
 <script src="{{ asset('assets/js/app.js') }}"></script>
 
 {{-- Custom (WAJIB kalau kamu punya logic: modal Livewire, re-init select2, dll.) --}}
-<script src="{{ asset('assets/js/greensand.js') }}"></script>
+<script src="{{ asset('assets/js/app-global.js') }}"></script>

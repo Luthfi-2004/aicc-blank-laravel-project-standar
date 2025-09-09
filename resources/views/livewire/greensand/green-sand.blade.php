@@ -99,9 +99,11 @@
                                         <button type="button" class="btn btn-outline-primary btn-sm mr-2 mb-2" wire:click="clearFilters">
                                             <i class="ri-refresh-line mr-1"></i> Refresh Filter
                                         </button>
-                                        <button type="button" class="btn btn-outline-success btn-sm mb-2" wire:click="export">
-                                            <i class="ri-file-excel-2-line mr-1"></i> Export Excel
-                                        </button>
+                                       <button type="button" class="btn btn-outline-success btn-sm mb-2"
+        wire:click="export('{{ $activeTab }}')">
+    <i class="ri-file-excel-2-line mr-1"></i> Export Excel
+</button>
+
                                     </div>
                                 </div>
                             </div>
@@ -112,15 +114,12 @@
                 <div class="card mb-4">
                     <div class="card-body shadow-lg">
                         <div class="mb-3">
-                            <button
-                                type="button"
-                                class="btn btn-success btn-sm"
-                                wire:click="create"
-                                data-toggle="modal"
-                                data-target="#modal-greensand"
-                            >
-                                <i class="ri-add-line"></i> Add Data
-                            </button>
+                           <button type="button"
+        class="btn btn-success btn-sm"
+        wire:click="create">
+    <i class="ri-add-line"></i> Add Data
+</button>
+
                         </div>
 
                         @include('livewire.greensand.green-sand-table')
@@ -133,3 +132,6 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script src="{{ asset('assets/js/greensand.js') }}"></script>  
+@endpush

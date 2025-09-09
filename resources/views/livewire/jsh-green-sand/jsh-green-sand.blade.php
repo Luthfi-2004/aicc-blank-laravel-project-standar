@@ -107,8 +107,6 @@
                         {{-- Modal terpisah --}}
                         @include('livewire.jsh-green-sand.jsh-green-sand-form')
 
-                        {{-- JS khusus halaman ini --}}
-                        @include('livewire.jsh-green-sand.jsh-green-sand-js')
 
                     </div>
                 </div>
@@ -116,3 +114,6 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script src="{{ asset('assets/js/greensand-jsh.js') }}"></script>  
+@endpush
