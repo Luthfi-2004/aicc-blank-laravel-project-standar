@@ -25,7 +25,7 @@
                 {{-- JSH GFN --}}
                 <li>
                     <a href="{{ route('jsh-green-sand.index') }}" class="waves-effect {{ request()->routeIs('jsh-green-sand.index') ? 'active' : '' }}">
-                        <i class="ri-settings-line"></i>
+                        <i class="fas fa-chart-bar"></i>
                         <span>JSH GFN</span>
                     </a>
                 </li>
